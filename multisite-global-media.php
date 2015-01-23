@@ -36,6 +36,7 @@ add_filter( 'media_upload_tabs', __NAMESPACE__ . '\add_tab' );
  * Add tab in the modal of "Add media"
  *
  * @since  2015-01-22
+ *
  * @param  $tabs
  *
  * @return array
@@ -43,7 +44,7 @@ add_filter( 'media_upload_tabs', __NAMESPACE__ . '\add_tab' );
 function add_tab( $tabs ) {
 
 	$media_tab = array( 'global_media' => __( 'Global Media' ) );
-	$tabs = array_merge( $tabs, $media_tab );
+	$tabs      = array_merge( $tabs, $media_tab );
 
 	return $tabs;
 }
@@ -57,13 +58,25 @@ add_action( 'media_upload_global_media', __NAMESPACE__ . '\custom_upload' );
  */
 function custom_upload() {
 
-	return wp_iframe( __NAMESPACE__ . '\media_process' );
+	$errors = array();
+	if ( ! empty( $_POST ) ) {
+		$return = media_upload_form_handler();
+
+		if ( is_string( $return ) ) {
+			return $return;
+		}
+		if ( is_array( $return ) ) {
+			$errors = $return;
+		}
+	}
+
+	return wp_iframe( __NAMESPACE__ . '\media_process', $errors );
 }
 
 /*
  * Custom media process
  *
- * media_nsm_process() contains the code for what you want to display.
+ * media_process() contains the code for what you want to display.
  * This function MUST start with the word 'media' in order for the proper CSS to load.
  *
  * Switch to site with ID 3 to get all media from this.
@@ -73,10 +86,11 @@ function custom_upload() {
  *
  * @since  2015-01-22
  */
-function media_process() {
+function media_process( $errors ) {
 
 	$blog_id = (int) blog_id;
 	switch_to_blog( $blog_id );
-	media_upload_library();
+	//	media_upload_library();
+	media_upload_library_form( $errors );
 	restore_current_blog();
 }
