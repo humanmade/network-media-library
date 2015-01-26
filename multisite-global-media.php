@@ -1,164 +1,187 @@
 <?php
 /**
- * Plugin Name: Global Media
- * Version: 0.1
- * Description: Share a media library across a multisite network.
- * Author: Dominik Schilling, Frank Bültge
- * Author URI: http://wphelper.de/
+ * Plugin Name: Multisite Global Media
+ * Description: Share an media library across multisite network
+ * Network:     true
  * Plugin URI:
- *
+ * Version:     0.0.1
+ * Author:      Dominik Schilling, Frank Bültge
+ * Author URI:  http://bueltge.de/
+ * License:     GPLv2+
+ * License URI: ./license.txt
  * Text Domain: global-media
  * Domain Path: /languages
- * Network: true
  *
- * License: GPLv2 or later
+ * Php Version 5.3
  *
- *	Copyright (C) 2015 Dominik Schilling
- *
- *	This program is free software; you can redistribute it and/or
- *	modify it under the terms of the GNU General Public License
- *	as published by the Free Software Foundation; either version 2
- *	of the License, or (at your option) any later version.
- *
- *	This program is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU General Public License for more details.
- *
- *	You should have received a copy of the GNU General Public License
- *	along with this program; if not, write to the Free Software
- *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ * @package WordPress
+ * @author  Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
+ * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @version 2015-01-26
  */
+namespace Multisite_Global_Media;
 
 /**
  * Don't call this file directly.
  */
-if ( ! class_exists( 'WP' ) ) {
-	die();
-}
-
-
-define( 'GM_BLOG_ID', 2 );
+defined( 'ABSPATH' ) || die();
 
 /**
- * [gm_enqueue_scripts description]
- * @return [type] [description]
+ * Id of side inside the network, there store the global media
+ *
+ * @var    integer
+ * @since  2015-01-22
  */
-function gm_enqueue_scripts() {
+const BLOG_ID = 3;
+
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
+/**
+ * Enqueue script for media modal
+ *
+ * @since   2015-01-26
+ * @return null
+ */
+function enqueue_scripts() {
+
 	if ( 'post' !== get_current_screen()->base ) {
-		return;
+		return NULL;
 	}
 
-	wp_enqueue_script( 'global-media', plugins_url( 'assets/js/global-media.js', __FILE__ ), array( 'media-views' ), '0.1', true );
+	wp_enqueue_script(
+		'global-media',
+		plugins_url( 'assets/js/global-media.js', __FILE__ ),
+		array( 'media-views' ),
+		'0.1',
+		TRUE
+	);
 }
-add_action( 'admin_enqueue_scripts', 'gm_enqueue_scripts' );
 
+add_filter( 'media_view_strings', __NAMESPACE__ . '\get_media_strings' );
 /**
- * [gm_media_strings description]
- * @param  [type] $strings [description]
- * @return [type]          [description]
+ * Define Strings for translation
+ *
+ * @since   2015-01-26
+ * @param $strings
+ *
+ * @return mixed
  */
-function gm_media_strings( $strings ) {
-	$strings['globalMediaTitle'] = __( 'Global Media', 'global-media' );
+function get_media_strings( $strings ) {
+
+	$strings[ 'globalMediaTitle' ] = __( 'Global Media', 'global-media' );
 
 	return $strings;
 }
-add_filter( 'media_view_strings', 'gm_media_strings' );
 
 /**
- * [gm_fake_attachment_ids description]
- * @param  [type] $response [description]
- * @return [type]           [description]
+ * Prepare media for javascript
+ *
+ * @since   2015-01-26
+ * @param $response
+ *
+ * @return mixed
  */
-function gm_prepare_attachment_for_js( $response ) {
-	$id_prefix = GM_BLOG_ID . '00000';
+function prepare_attachment_for_js( $response ) {
 
-	$response['id'] = $id_prefix. $response['id']; // Unique ID, must be a number.
-	$response['nonces']['update'] = false;
-	$response['nonces']['edit'] = false;
-	$response['nonces']['delete'] = false;
-	$response['editLink'] = false;
+	$id_prefix = BLOG_ID . '00000';
+
+	$response[ 'id' ]                 = $id_prefix . $response[ 'id' ]; // Unique ID, must be a number.
+	$response[ 'nonces' ][ 'update' ] = FALSE;
+	$response[ 'nonces' ][ 'edit' ]   = FALSE;
+	$response[ 'nonces' ][ 'delete' ] = FALSE;
+	$response[ 'editLink' ]           = FALSE;
 
 	return $response;
 }
 
+add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\ajax_query_attachments', 0 );
 /**
  * Same as wp_ajax_query_attachments() but with switch_to_blog support.
  *
+ * @since   2015-01-26
  * @return void
  */
-function gm_ajax_query_attachments() {
-	$query = isset( $_REQUEST['query'] ) ? (array) $_REQUEST['query'] : array();
+function ajax_query_attachments() {
 
-	if ( ! empty( $query['global-media'] ) ) {
-		switch_to_blog( GM_BLOG_ID );
+	$query = isset( $_REQUEST[ 'query' ] ) ? (array) $_REQUEST[ 'query' ] : array();
 
-		add_filter( 'wp_prepare_attachment_for_js', 'gm_prepare_attachment_for_js' );
+	if ( ! empty( $query[ 'global-media' ] ) ) {
+		switch_to_blog( BLOG_ID );
+
+		add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js' );
 	}
 
 	wp_ajax_query_attachments();
 	exit;
 }
-add_action( 'wp_ajax_query-attachments' , 'gm_ajax_query_attachments', 0 );
 
 /**
- * [gm_media_send_to_editor description]
- * @param  [type] $html [description]
- * @param  [type] $id   [description]
- * @return [type]       [description]
+ * Send media to editor
+ *
+ * @since   2015-01-26
+ * @param $html
+ * @param $id
+ *
+ * @return mixed
  */
-function gm_media_send_to_editor( $html, $id ) {
-	$id_prefix = GM_BLOG_ID . '00000';
-	$new_id = $id_prefix . $id; // Unique ID, must be a number.
+function media_send_to_editor( $html, $id ) {
 
-	$search = 'wp-image-' . $id;
+	$id_prefix = BLOG_ID . '00000';
+	$new_id    = $id_prefix . $id; // Unique ID, must be a number.
+
+	$search  = 'wp-image-' . $id;
 	$replace = 'wp-image-' . $new_id;
-	$html = str_replace( $search, $replace, $html );
+	$html    = str_replace( $search, $replace, $html );
 
 	return $html;
 }
 
+add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\ajax_send_attachment_to_editor', 0 );
 /**
- * [gm_ajax_send_attachment_to_editor description]
- * @return [type] [description]
+ * Send media via AJAX call to editor
+ *
+ * @since   2015-01-26
+ * @return  void
  */
-function gm_ajax_send_attachment_to_editor() {
-	$attachment = wp_unslash( $_POST['attachment'] );
-	$id = $attachment['id'];
-	$id_prefix = GM_BLOG_ID . '00000';
+function ajax_send_attachment_to_editor() {
 
-	if ( false !== strpos( $id, $id_prefix ) ) {
-		$attachment['id'] = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
-		$_POST['attachment'] = wp_slash( $attachment );
+	$attachment = wp_unslash( $_POST[ 'attachment' ] );
+	$id         = $attachment[ 'id' ];
+	$id_prefix  = BLOG_ID . '00000';
 
-		switch_to_blog( GM_BLOG_ID );
+	if ( FALSE !== strpos( $id, $id_prefix ) ) {
+		$attachment[ 'id' ]    = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
+		$_POST[ 'attachment' ] = wp_slash( $attachment );
 
-		add_filter( 'media_send_to_editor', 'gm_media_send_to_editor', 10, 2 );
+		switch_to_blog( BLOG_ID );
+
+		add_filter( 'media_send_to_editor', __NAMESPACE__ . '\media_send_to_editor', 10, 2 );
 	}
 
 	wp_ajax_send_attachment_to_editor();
-	exit;
+	exit();
 }
-add_action( 'wp_ajax_send-attachment-to-editor' , 'gm_ajax_send_attachment_to_editor', 0 );
 
+add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\ajax_get_attachment', 0 );
 /**
- * [gm_ajax_get_attachment description]
- * @return [type] [description]
+ * Get attachment
+ *
+ * @since   2015-01-26
+ * @return  void
  */
-function gm_ajax_get_attachment() {
-	$id = $_REQUEST['id'];
-	$id_prefix = GM_BLOG_ID . '00000';
+function ajax_get_attachment() {
 
-	if ( false !== strpos( $id, $id_prefix ) ) {
-		$id = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
-		$_REQUEST['id'] = $id;
+	$id        = $_REQUEST[ 'id' ];
+	$id_prefix = BLOG_ID . '00000';
 
-		switch_to_blog( GM_BLOG_ID );
+	if ( FALSE !== strpos( $id, $id_prefix ) ) {
+		$id               = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
+		$_REQUEST[ 'id' ] = $id;
 
-		add_filter( 'wp_prepare_attachment_for_js', 'gm_prepare_attachment_for_js' );
+		switch_to_blog( BLOG_ID );
+		add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js' );
+		restore_current_blog();
 	}
 
 	wp_ajax_get_attachment();
-	exit;
+	exit();
 }
-add_action( 'wp_ajax_get-attachment' , 'gm_ajax_get_attachment', 0 );
