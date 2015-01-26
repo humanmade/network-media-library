@@ -1,96 +1,164 @@
 <?php
 /**
- * Plugin Name: Multisite Global Media
- * Description: Share an media library across multisite network
- * Network:     true
+ * Plugin Name: Global Media
+ * Version: 0.1
+ * Description: Share a media library across a multisite network.
+ * Author: Dominik Schilling, Frank Bültge
+ * Author URI: http://wphelper.de/
  * Plugin URI:
- * Version:     0.0.1
- * Author:      Frank Bültge
- * Author URI:  http://bueltge.de/
- * License:     GPLv2+
- * License URI: ./assets/license.txt
  *
- * Php Version 5.3
+ * Text Domain: global-media
+ * Domain Path: /languages
+ * Network: true
  *
- * @package WordPress
- * @author  Frank Bültge <frank@bueltge.de>
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * @version 2015-01-22
+ * License: GPLv2 or later
+ *
+ *	Copyright (C) 2015 Dominik Schilling
+ *
+ *	This program is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either version 2
+ *	of the License, or (at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program; if not, write to the Free Software
+ *	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-
-namespace Multisite_Global_Media;
-
-// Exit if accessed directly
-defined( 'ABSPATH' ) || die();
 
 /**
- * Id of side inside the network, there store the global media
- *
- * @var    integer
- * @since  2015-01-22
+ * Don't call this file directly.
  */
-const blog_id = 3;
-
-add_filter( 'media_upload_tabs', __NAMESPACE__ . '\add_tab' );
-/**
- * Add tab in the modal of "Add media"
- *
- * @since  2015-01-22
- *
- * @param  $tabs
- *
- * @return array
- */
-function add_tab( $tabs ) {
-
-	$media_tab = array( 'global_media' => __( 'Global Media' ) );
-	$tabs      = array_merge( $tabs, $media_tab );
-
-	return $tabs;
+if ( ! class_exists( 'WP' ) ) {
+	die();
 }
 
-// Hook on "media_upload_$type"
-add_action( 'media_upload_global_media', __NAMESPACE__ . '\custom_upload' );
+
+define( 'GM_BLOG_ID', 2 );
+
 /**
- * Load custom process in media popup on custom tab
- *
- * @since  2015-01-22
+ * [gm_enqueue_scripts description]
+ * @return [type] [description]
  */
-function custom_upload() {
-
-	$errors = array();
-	if ( ! empty( $_POST ) ) {
-		$return = media_upload_form_handler();
-
-		if ( is_string( $return ) ) {
-			return $return;
-		}
-		if ( is_array( $return ) ) {
-			$errors = $return;
-		}
+function gm_enqueue_scripts() {
+	if ( 'post' !== get_current_screen()->base ) {
+		return;
 	}
 
-	return wp_iframe( __NAMESPACE__ . '\media_process', $errors );
+	wp_enqueue_script( 'global-media', plugins_url( 'assets/js/global-media.js', __FILE__ ), array( 'media-views' ), '0.1', true );
 }
+add_action( 'admin_enqueue_scripts', 'gm_enqueue_scripts' );
 
-/*
- * Custom media process
- *
- * media_process() contains the code for what you want to display.
- * This function MUST start with the word 'media' in order for the proper CSS to load.
- *
- * Switch to site with ID 3 to get all media from this.
- * In this example is side with ID 3 the global library for the network.
- *
- * media_upload_library() show the library, a custom function is helpful, if the default is not helpful enough
- *
- * @since  2015-01-22
+/**
+ * [gm_media_strings description]
+ * @param  [type] $strings [description]
+ * @return [type]          [description]
  */
-function media_process( $errors ) {
+function gm_media_strings( $strings ) {
+	$strings['globalMediaTitle'] = __( 'Global Media', 'global-media' );
 
-	$blog_id = (int) blog_id;
-	switch_to_blog( $blog_id );
-	//	media_upload_library();
-	media_upload_library_form( $errors );
-	restore_current_blog();
+	return $strings;
 }
+add_filter( 'media_view_strings', 'gm_media_strings' );
+
+/**
+ * [gm_fake_attachment_ids description]
+ * @param  [type] $response [description]
+ * @return [type]           [description]
+ */
+function gm_prepare_attachment_for_js( $response ) {
+	$id_prefix = GM_BLOG_ID . '00000';
+
+	$response['id'] = $id_prefix. $response['id']; // Unique ID, must be a number.
+	$response['nonces']['update'] = false;
+	$response['nonces']['edit'] = false;
+	$response['nonces']['delete'] = false;
+	$response['editLink'] = false;
+
+	return $response;
+}
+
+/**
+ * Same as wp_ajax_query_attachments() but with switch_to_blog support.
+ *
+ * @return void
+ */
+function gm_ajax_query_attachments() {
+	$query = isset( $_REQUEST['query'] ) ? (array) $_REQUEST['query'] : array();
+
+	if ( ! empty( $query['global-media'] ) ) {
+		switch_to_blog( GM_BLOG_ID );
+
+		add_filter( 'wp_prepare_attachment_for_js', 'gm_prepare_attachment_for_js' );
+	}
+
+	wp_ajax_query_attachments();
+	exit;
+}
+add_action( 'wp_ajax_query-attachments' , 'gm_ajax_query_attachments', 0 );
+
+/**
+ * [gm_media_send_to_editor description]
+ * @param  [type] $html [description]
+ * @param  [type] $id   [description]
+ * @return [type]       [description]
+ */
+function gm_media_send_to_editor( $html, $id ) {
+	$id_prefix = GM_BLOG_ID . '00000';
+	$new_id = $id_prefix . $id; // Unique ID, must be a number.
+
+	$search = 'wp-image-' . $id;
+	$replace = 'wp-image-' . $new_id;
+	$html = str_replace( $search, $replace, $html );
+
+	return $html;
+}
+
+/**
+ * [gm_ajax_send_attachment_to_editor description]
+ * @return [type] [description]
+ */
+function gm_ajax_send_attachment_to_editor() {
+	$attachment = wp_unslash( $_POST['attachment'] );
+	$id = $attachment['id'];
+	$id_prefix = GM_BLOG_ID . '00000';
+
+	if ( false !== strpos( $id, $id_prefix ) ) {
+		$attachment['id'] = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
+		$_POST['attachment'] = wp_slash( $attachment );
+
+		switch_to_blog( GM_BLOG_ID );
+
+		add_filter( 'media_send_to_editor', 'gm_media_send_to_editor', 10, 2 );
+	}
+
+	wp_ajax_send_attachment_to_editor();
+	exit;
+}
+add_action( 'wp_ajax_send-attachment-to-editor' , 'gm_ajax_send_attachment_to_editor', 0 );
+
+/**
+ * [gm_ajax_get_attachment description]
+ * @return [type] [description]
+ */
+function gm_ajax_get_attachment() {
+	$id = $_REQUEST['id'];
+	$id_prefix = GM_BLOG_ID . '00000';
+
+	if ( false !== strpos( $id, $id_prefix ) ) {
+		$id = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
+		$_REQUEST['id'] = $id;
+
+		switch_to_blog( GM_BLOG_ID );
+
+		add_filter( 'wp_prepare_attachment_for_js', 'gm_prepare_attachment_for_js' );
+	}
+
+	wp_ajax_get_attachment();
+	exit;
+}
+add_action( 'wp_ajax_get-attachment' , 'gm_ajax_get_attachment', 0 );
