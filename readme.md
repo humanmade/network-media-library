@@ -32,6 +32,7 @@ you can use it free of charge on your personal or commercial blog.
 
 ### Contact & Feedback
 The plugin is designed and developed by team members from the [Inpsyde](http://inpsyde.com/) crew.
+Special thanks and praise to Dominik Schilling for his quick help.
 
 Please let me know if you like the plugin or you hate it or whatever ... 
 Please fork it, add an issue for ideas and bugs.
