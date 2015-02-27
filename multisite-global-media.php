@@ -56,6 +56,28 @@ function enqueue_scripts() {
 	);
 }
 
+add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_styles' );
+/**
+ * Enqueue script for media modal
+ *
+ * @since   2015-02-27
+ * @return null
+ */
+function enqueue_styles() {
+
+	if ( 'post' !== get_current_screen()->base ) {
+		return NULL;
+	}
+
+	wp_enqueue_style(
+		'global-media',
+		plugins_url( 'assets/css/global-media.css', __FILE__ ),
+		array(),
+		'0.1',
+		'all'
+	);
+}
+
 add_filter( 'media_view_strings', __NAMESPACE__ . '\get_media_strings' );
 /**
  * Define Strings for translation
