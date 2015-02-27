@@ -3,7 +3,7 @@
  * Plugin Name: Multisite Global Media
  * Description: Share an media library across multisite network
  * Network:     true
- * Plugin URI:
+ * Plugin URI:  https://github.com/bueltge/Multisite-Global-Media
  * Version:     0.0.2
  * Author:      Dominik Schilling, Frank Bültge
  * Author URI:  http://bueltge.de/
