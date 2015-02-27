@@ -14,6 +14,7 @@ To get Global Media to work one has to follow these steps:
  ```php
  /**
   * Id of side inside the network, there store the global media
+  * Select the ID of the site/blog to where you want media that will be shared across the network to be stored.
   *
   * @var    integer
   * @since  2015-01-22
