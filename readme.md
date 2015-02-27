@@ -8,7 +8,7 @@ To get Global Media to work one has to follow these steps:
 
 1. Decide on which blog/site that will host shared media for the network.
 2. Add media to the media library for the specific blog/site.
-4. Find the ID of a site by going to All Sites section hovering over the site checking the left bottom status bar left or installing a plugin that shows the ID's of each site.
+4. Find the ID of a site by going to All Sites section hovering over the site checking the left bottom status bar or installing a plugin that shows the ID's of each site.
 3. Open the file multisite-global-media.php go to the following code:
  
  ```php
