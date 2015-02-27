@@ -5,6 +5,7 @@ _Multisite Global Media_ is a WordPress plugin, that shared media across the Mul
  This simple plugin add a new tab to the media modal and give you the chance to use media from one blog of the network in each blog - shared media across the Multisite network. This is a simple plugin without custom media modal and fixed value for the blog, there store the media for the network. The ID of the blog was set in the constant `blog_id`, currently the blog id `3`. Change this value, if you will use a other side of the network as global media library.
  
 To get Global Media to work one has to follow these steps:
+
 1. Decide on which blog/site that will host shared media for the network.
 2. Add media to the media library for the specific blog/site.
 4. Find the ID of a site by going to All Sites section hovering over the site checking the left bottom status bar left or installing a plugin that shows the ID's of each site.
