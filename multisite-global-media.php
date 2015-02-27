@@ -4,7 +4,7 @@
  * Description: Share an media library across multisite network
  * Network:     true
  * Plugin URI:
- * Version:     0.0.1
+ * Version:     0.0.2
  * Author:      Dominik Schilling, Frank Bültge
  * Author URI:  http://bueltge.de/
  * License:     GPLv2+
@@ -54,6 +54,7 @@ function enqueue_scripts() {
 		'0.1',
 		TRUE
 	);
+	wp_enqueue_script( 'global-media' );
 }
 
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_styles' );
@@ -69,13 +70,14 @@ function enqueue_styles() {
 		return NULL;
 	}
 
-	wp_enqueue_style(
+	wp_register_style(
 		'global-media',
 		plugins_url( 'assets/css/global-media.css', __FILE__ ),
 		array(),
 		'0.1',
 		'all'
 	);
+	wp_enqueue_style( 'global-media' );
 }
 
 add_filter( 'media_view_strings', __NAMESPACE__ . '\get_media_strings' );
