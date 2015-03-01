@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Multisite Global Media
- * Description: Share an media library across multisite network
+ * Description: Multisite Global Media is a WordPress plugin which shares media across the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/bueltge/Multisite-Global-Media
  * Version:     0.0.2
@@ -17,7 +17,7 @@
  * @package WordPress
  * @author  Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * @version 2015-01-26
+ * @version 2015-03-01
  */
 namespace Multisite_Global_Media;
 
@@ -27,12 +27,14 @@ namespace Multisite_Global_Media;
 defined( 'ABSPATH' ) || die();
 
 /**
- * Id of side inside the network, there store the global media
+ * Id of side inside the network, there store the global media.
+ * Select the ID of the site/blog to where you want media
+ *  that will be shared across the network to be stored.
  *
  * @var    integer
  * @since  2015-01-22
  */
-const BLOG_ID = 3;
+const SITE_ID = 3;
 
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
 /**
@@ -106,7 +108,7 @@ function get_media_strings( $strings ) {
  */
 function prepare_attachment_for_js( $response ) {
 
-	$id_prefix = BLOG_ID . '00000';
+	$id_prefix = SITE_ID . '00000';
 
 	$response[ 'id' ]                 = $id_prefix . $response[ 'id' ]; // Unique ID, must be a number.
 	$response[ 'nonces' ][ 'update' ] = FALSE;
@@ -129,7 +131,7 @@ function ajax_query_attachments() {
 	$query = isset( $_REQUEST[ 'query' ] ) ? (array) $_REQUEST[ 'query' ] : array();
 
 	if ( ! empty( $query[ 'global-media' ] ) ) {
-		switch_to_blog( BLOG_ID );
+		switch_to_blog( SITE_ID );
 
 		add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js' );
 	}
@@ -149,7 +151,7 @@ function ajax_query_attachments() {
  */
 function media_send_to_editor( $html, $id ) {
 
-	$id_prefix = BLOG_ID . '00000';
+	$id_prefix = SITE_ID . '00000';
 	$new_id    = $id_prefix . $id; // Unique ID, must be a number.
 
 	$search  = 'wp-image-' . $id;
@@ -170,13 +172,13 @@ function ajax_send_attachment_to_editor() {
 
 	$attachment = wp_unslash( $_POST[ 'attachment' ] );
 	$id         = $attachment[ 'id' ];
-	$id_prefix  = BLOG_ID . '00000';
+	$id_prefix  = SITE_ID . '00000';
 
 	if ( FALSE !== strpos( $id, $id_prefix ) ) {
 		$attachment[ 'id' ]    = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
 		$_POST[ 'attachment' ] = wp_slash( $attachment );
 
-		switch_to_blog( BLOG_ID );
+		switch_to_blog( SITE_ID );
 
 		add_filter( 'media_send_to_editor', __NAMESPACE__ . '\media_send_to_editor', 10, 2 );
 	}
@@ -195,13 +197,13 @@ add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\ajax_get_attachment', 0 
 function ajax_get_attachment() {
 
 	$id        = $_REQUEST[ 'id' ];
-	$id_prefix = BLOG_ID . '00000';
+	$id_prefix = SITE_ID . '00000';
 
 	if ( FALSE !== strpos( $id, $id_prefix ) ) {
 		$id               = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
 		$_REQUEST[ 'id' ] = $id;
 
-		switch_to_blog( BLOG_ID );
+		switch_to_blog( SITE_ID );
 		add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js' );
 		restore_current_blog();
 	}
