@@ -26,7 +26,7 @@ To get Global Media to work one has to follow these steps:
 The plugin defines the hook `global_media.site_id` to set an ID for the network Site, that store the media files, like `add_filter( 'global_media.site_id', 1234 );`.
 
 #### Composer
-The plugin is also available via [Composer package](https://packagist.org/packages/bueltge/multisite-global-media).
+The plugin is also available as [Composer package](https://packagist.org/packages/bueltge/multisite-global-media).
 
     composer require bueltge/multisite-global-media
 
@@ -42,14 +42,13 @@ Please give me feedback, contribute and file technical bugs on this
 [GitHub Repo](https://github.com/bueltge/Multisite-Global-Media/issues), use Issues.
 
 ### License
-Good news, this plugin is free for everyone! Since it's released under the GPL,
-you can use it free of charge on your personal or commercial blog.
+Good news, this plugin is free for everyone! Since it's released under the MIT, you can use it free of charge on your personal or commercial blog.
 
 ### Contact & Feedback
-The plugin is designed and developed by team members from the [Inpsyde](https://inpsyde.com/) crew.
-Special thanks and praise to Dominik Schilling for his quick help.
+The plugin is designed and developed by team members from the [Inpsyde](https://inpsyde.com/) crew. Special thanks and praise to Dominik Schilling for his quick help.
 
 Please let me know if you like the plugin or you hate it or whatever ...
+
 Please fork it, add an issue for ideas and bugs.
 
 ### Disclaimer
