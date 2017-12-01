@@ -4,12 +4,12 @@
  * Description: Multisite Global Media is a WordPress plugin which shares media across the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/bueltge/Multisite-Global-Media
- * Version:     0.0.2
+ * Version:     0.0.3
  * Author:      Dominik Schilling, Frank Bültge
  * Author URI:  http://bueltge.de/
  * License:     GPLv2+
  * License URI: ./license.txt
- * Text Domain: global-media
+ * Text Domain: global_media
  * Domain Path: /languages
  *
  * Php Version 5.3
@@ -17,7 +17,7 @@
  * @package WordPress
  * @author  Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
  * @license http://opensource.org/licenses/gpl-license.php GNU Public License
- * @version 2015-03-01
+ * @version 2017-12-01
  */
 namespace Multisite_Global_Media;
 
@@ -30,17 +30,30 @@ defined( 'ABSPATH' ) || die();
  * Id of side inside the network, there store the global media.
  * Select the ID of the site/blog to where you want media
  *  that will be shared across the network to be stored.
+ * Alternative change this value with the help
+ *  of the filter hook 'global_media.site_id'.
  *
  * @var    integer
  * @since  2015-01-22
  */
 const SITE_ID = 3;
 
+/**
+ * Return the ID of site that store the media files.
+ *
+ * @since  2017-12-01
+ * @return integer The site ID.
+ */
+function get_site_id() {
+
+	return (int) apply_filters( 'global_media.site_id', SITE_ID );
+}
+
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts' );
 /**
  * Enqueue script for media modal
  *
- * @since   2015-01-26
+ * @since  2015-01-26
  * @return null
  */
 function enqueue_scripts() {
@@ -50,13 +63,13 @@ function enqueue_scripts() {
 	}
 
 	wp_enqueue_script(
-		'global-media',
+		'global_media',
 		plugins_url( 'assets/js/global-media.js', __FILE__ ),
 		array( 'media-views' ),
 		'0.1',
 		TRUE
 	);
-	wp_enqueue_script( 'global-media' );
+	wp_enqueue_script( 'global_media' );
 }
 
 add_action( 'admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_styles' );
@@ -73,13 +86,12 @@ function enqueue_styles() {
 	}
 
 	wp_register_style(
-		'global-media',
+		'global_media',
 		plugins_url( 'assets/css/global-media.css', __FILE__ ),
 		array(),
-		'0.1',
-		'all'
+		'0.1'
 	);
-	wp_enqueue_style( 'global-media' );
+	wp_enqueue_style( 'global_media' );
 }
 
 add_filter( 'media_view_strings', __NAMESPACE__ . '\get_media_strings' );
@@ -93,8 +105,7 @@ add_filter( 'media_view_strings', __NAMESPACE__ . '\get_media_strings' );
  */
 function get_media_strings( $strings ) {
 
-	$strings[ 'globalMediaTitle' ] = __( 'Global Media', 'global-media' );
-
+	$strings[ 'globalMediaTitle' ] = esc_html__( 'Global Media', 'global_media' );
 	return $strings;
 }
 
@@ -108,7 +119,7 @@ function get_media_strings( $strings ) {
  */
 function prepare_attachment_for_js( $response ) {
 
-	$id_prefix = SITE_ID . '00000';
+	$id_prefix = get_site_id() . '00000';
 
 	$response[ 'id' ]                 = $id_prefix . $response[ 'id' ]; // Unique ID, must be a number.
 	$response[ 'nonces' ][ 'update' ] = FALSE;
@@ -130,8 +141,8 @@ function ajax_query_attachments() {
 
 	$query = isset( $_REQUEST[ 'query' ] ) ? (array) $_REQUEST[ 'query' ] : array();
 
-	if ( ! empty( $query[ 'global-media' ] ) ) {
-		switch_to_blog( SITE_ID );
+	if ( ! empty( $query[ 'global_media' ] ) ) {
+		switch_to_blog( get_site_id() );
 
 		add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js' );
 	}
@@ -151,7 +162,7 @@ function ajax_query_attachments() {
  */
 function media_send_to_editor( $html, $id ) {
 
-	$id_prefix = SITE_ID . '00000';
+	$id_prefix = get_site_id() . '00000';
 	$new_id    = $id_prefix . $id; // Unique ID, must be a number.
 
 	$search  = 'wp-image-' . $id;
@@ -172,13 +183,13 @@ function ajax_send_attachment_to_editor() {
 
 	$attachment = wp_unslash( $_POST[ 'attachment' ] );
 	$id         = $attachment[ 'id' ];
-	$id_prefix  = SITE_ID . '00000';
+	$id_prefix  = get_site_id() . '00000';
 
 	if ( FALSE !== strpos( $id, $id_prefix ) ) {
 		$attachment[ 'id' ]    = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
 		$_POST[ 'attachment' ] = wp_slash( $attachment );
 
-		switch_to_blog( SITE_ID );
+		switch_to_blog( get_site_id() );
 
 		add_filter( 'media_send_to_editor', __NAMESPACE__ . '\media_send_to_editor', 10, 2 );
 	}
@@ -197,13 +208,13 @@ add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\ajax_get_attachment', 0 
 function ajax_get_attachment() {
 
 	$id        = $_REQUEST[ 'id' ];
-	$id_prefix = SITE_ID . '00000';
+	$id_prefix = get_site_id() . '00000';
 
 	if ( FALSE !== strpos( $id, $id_prefix ) ) {
 		$id               = str_replace( $id_prefix, '', $id ); // Unique ID, must be a number.
 		$_REQUEST[ 'id' ] = $id;
 
-		switch_to_blog( SITE_ID );
+		switch_to_blog( get_site_id() );
 		add_filter( 'wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js' );
 		restore_current_blog();
 	}
