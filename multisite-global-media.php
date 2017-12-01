@@ -7,8 +7,8 @@
  * Version:     0.0.3
  * Author:      Dominik Schilling, Frank Bültge
  * Author URI:  http://bueltge.de/
- * License:     GPLv2+
- * License URI: ./license.txt
+ * License:     MIT
+ * License URI: ./LICENSE
  * Text Domain: global_media
  * Domain Path: /languages
  *
