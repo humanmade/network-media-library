@@ -21,14 +21,16 @@ To get Global Media to work one has to follow these steps:
   */
  const SITE_ID = 3;
  ```
+ 
+ The plugin is also available via [Composer packege](https://packagist.org/packages/bueltge/multisite-global-media).
+    `composer require bueltge/multisite-global-media`
 
 ### Screenshots
  ![Media Modal](./assets/screenshot-1.png)
 
 ## Other Notes
 
-### Crafted by [Inpsyde](http://inpsyde.com) &middot; Engineering the web since 2006.
-Yes, we also run that [marketplace for premium WordPress plugins and themes](http://marketpress.com).
+### Crafted by [Inpsyde](https://inpsyde.com) &middot; Engineering the web since 2006.
 
 ### Bugs, technical hints or contribute
 Please give me feedback, contribute and file technical bugs on this
@@ -39,7 +41,7 @@ Good news, this plugin is free for everyone! Since it's released under the GPL,
 you can use it free of charge on your personal or commercial blog.
 
 ### Contact & Feedback
-The plugin is designed and developed by team members from the [Inpsyde](http://inpsyde.com/) crew.
+The plugin is designed and developed by team members from the [Inpsyde](https://inpsyde.com/) crew.
 Special thanks and praise to Dominik Schilling for his quick help.
 
 Please let me know if you like the plugin or you hate it or whatever ...
