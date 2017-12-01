@@ -16,7 +16,7 @@
  *
  * @package WordPress
  * @author  Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
- * @license http://opensource.org/licenses/gpl-license.php GNU Public License
+ * @license https://opensource.org/licenses/MIT
  * @version 2017-12-01
  */
 namespace Multisite_Global_Media;
