@@ -6,7 +6,7 @@
  * Plugin URI:  https://github.com/bueltge/Multisite-Global-Media
  * Version:     0.0.3
  * Author:      Dominik Schilling, Frank Bültge
- * Author URI:  http://bueltge.de/
+ * Author URI:  https://bueltge.de/
  * License:     MIT
  * License URI: ./LICENSE
  * Text Domain: global_media
