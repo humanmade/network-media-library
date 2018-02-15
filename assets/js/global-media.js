@@ -22,7 +22,7 @@ var gm = gm || {};
 			contentUserSetting: false,
 			displayUserSettings: true,
 			allowLocalEdits: true,
-			library: wp.media.query({ 'global-media': true })
+			library: wp.media.query({ 'global_media': true })
 		}, wp.media.controller.Library.prototype.defaults ),
 	});
 
