@@ -8,8 +8,8 @@ To get Global Media to work one has to follow these steps:
 
 1. Decide on which blog/site that will host shared media for the network.
 2. Add media to the media library for the specific blog/site.
-4. Find the ID of a site by going to All Sites section hovering over the site checking the left bottom status bar or installing a plugin that shows the ID's of each site.
-3. Open the file multisite-global-media.php go to the following code:
+4. Find the ID of a site by going to All Sites section hovering over the site checking the left bottom status bar or installing a plugin that shows the ID's of each site. An comfortable enhancement in the Multisite context is the plugin [Multisite Enhancement](https://github.com/bueltge/wordpress-multisite-enhancements).
+3. Open the file `multisite-global-media.php` go to the following code:
 
  ```php
  /**
@@ -21,9 +21,17 @@ To get Global Media to work one has to follow these steps:
   */
  const SITE_ID = 3;
  ```
- 
+
+Normally we you should not change the source. It is much easier for maintenance and other points. So if you familiar with code in the WordPress context, use the hook below to change the default Site ID of the plugin with a small custom plugin.
+
 #### Hook for Site ID
 The plugin defines the hook `global_media.site_id` to set an ID for the network Site, that store the media files, like `add_filter( 'global_media.site_id', 1234 );`.
+
+### Installation
+* Download the plugin as zip, use a clone of the repo or use Composer, see below
+* Install the plugin in your environment, recommend as [Must Use plugin](https://codex.wordpress.org/Must_Use_Plugins), also here a small [hint](https://github.com/bueltge/must-use-loader) for an helping solution [Must Use Loader](https://github.com/bueltge/must-use-loader).
+* Set the side ID for the Global Mediathek, see above the description to change them inside the source or use the hook.
+* Active the plugin for the hole network
 
 #### Composer
 The plugin is also available as [Composer package](https://packagist.org/packages/bueltge/multisite-global-media).
