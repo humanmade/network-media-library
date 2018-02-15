@@ -1,10 +1,6 @@
 {
   "name": "bueltge/multisite-global-media",
   "type": "wordpress-plugin",
-  "require": {
-    "php": ">=5.3.2",
-    "composer/installers": "~1.2.0"
-  },
   "description": "Multisite Global Media is a WordPress plugin which shares media across the Multisite network.",
   "keywords": ["wordpress", "plugin", "multisite"],
   "homepage": "https://github.com/bueltge/Multisite-Global-Media",
@@ -18,5 +14,12 @@
       "name": "Frank Bültge",
       "homepage": "https://bueltge.de/"
     }
-  ]
+  ],
+  "require": {
+    "php": ">=5.3.2",
+    "composer/installers": "~1.2.0"
+  },
+  "require-dev": {
+    "inpsyde/php-coding-standards": "^0.8"
+  }
 }
