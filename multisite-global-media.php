@@ -4,10 +4,9 @@
  * Plugin Name: Multisite Global Media
  * Description: Multisite Global Media is a WordPress plugin which shares media across the Multisite network.
  * Network:     true
- * Plugin URI:  https://github.com/bueltge/Multisite-Global-Media
+ * Plugin URI:  https://github.com/bueltge/multisite-global-media
  * Version:     0.0.4
  * Author:      Dominik Schilling, Frank Bültge
- * Author URI:  https://bueltge.de/
  * License:     MIT
  * License URI: ./LICENSE
  * Text Domain: global_media
