@@ -1,4 +1,5 @@
 <?php # -*- coding: utf-8 -*-
+
 /**
  * Plugin Name: Multisite Global Media
  * Description: Multisite Global Media is a WordPress plugin which shares media across the Multisite network.
@@ -125,11 +126,11 @@ function prepare_attachment_for_js($response)
 
     $id_prefix = get_site_id() . '00000';
 
-    $response['id'] = $id_prefix . $response['id']; // Unique ID, must be a number.
+    $response['id']               = $id_prefix . $response['id']; // Unique ID, must be a number.
     $response['nonces']['update'] = false;
-    $response['nonces']['edit'] = false;
+    $response['nonces']['edit']   = false;
     $response['nonces']['delete'] = false;
-    $response['editLink'] = false;
+    $response['editLink']         = false;
 
     return $response;
 }
@@ -169,11 +170,11 @@ function media_send_to_editor($html, $id)
 {
 
     $id_prefix = get_site_id() . '00000';
-    $new_id = $id_prefix . $id; // Unique ID, must be a number.
+    $new_id    = $id_prefix . $id; // Unique ID, must be a number.
 
-    $search = 'wp-image-' . $id;
+    $search  = 'wp-image-' . $id;
     $replace = 'wp-image-' . $new_id;
-    $html = str_replace($search, $replace, $html);
+    $html    = str_replace($search, $replace, $html);
 
     return $html;
 }
@@ -189,11 +190,11 @@ function ajax_send_attachment_to_editor()
 {
 
     $attachment = wp_unslash($_POST['attachment']);
-    $id = $attachment['id'];
-    $id_prefix = get_site_id() . '00000';
+    $id         = $attachment['id'];
+    $id_prefix  = get_site_id() . '00000';
 
     if (false !== strpos($id, $id_prefix)) {
-        $attachment['id'] = str_replace($id_prefix, '', $id); // Unique ID, must be a number.
+        $attachment['id']    = str_replace($id_prefix, '', $id); // Unique ID, must be a number.
         $_POST['attachment'] = wp_slash($attachment);
 
         switch_to_blog(get_site_id());
@@ -215,11 +216,11 @@ add_action('wp_ajax_get-attachment', __NAMESPACE__ . '\ajax_get_attachment', 0);
 function ajax_get_attachment()
 {
 
-    $id = $_REQUEST['id'];
+    $id        = $_REQUEST['id'];
     $id_prefix = get_site_id() . '00000';
 
     if (false !== strpos($id, $id_prefix)) {
-        $id = str_replace($id_prefix, '', $id); // Unique ID, must be a number.
+        $id             = str_replace($id_prefix, '', $id); // Unique ID, must be a number.
         $_REQUEST['id'] = $id;
 
         switch_to_blog(get_site_id());
