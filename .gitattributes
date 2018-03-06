@@ -6,7 +6,6 @@
 .gitignore          export-ignore
 .gitattributes      export-ignore
 .idea/              export-ignore
-assets/             export-ignore
 test/               export-ignore
 CONTRIBUTING.md     export-ignore
 Gruntfile.js        export-ignore
