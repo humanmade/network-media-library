@@ -228,4 +228,139 @@ var gm = gm || {};
 		}
 	});
 
+	wp.media.view.MediaFrame.Select = wp.media.view.MediaFrame.Select.extend({
+
+	    initialize: function() {
+	        wp.media.view.MediaFrame.prototype.initialize.apply( this, arguments );
+
+	        _.defaults( this.options, {
+	            multiple:  true,
+	            editing:   false,
+	            state:    'insert'
+	        });
+
+	        this.createSelection();
+	        this.createStates();
+	        this.bindHandlers();
+	    },
+
+	    /**
+	     * Bind region mode event callbacks.
+	     *
+	     * @see media.controller.Region.render
+	     */
+	    bindHandlers: function() {
+	        this.on( 'router:create:browse', this.createRouter, this );
+	        this.on( 'router:render:browse', this.browseRouter, this );
+	        this.on( 'content:create:browse', this.browseContent, this );
+	        this.on( 'content:render:upload', this.uploadContent, this );
+	        this.on( 'toolbar:create:select', this.createSelectToolbar, this );
+	        this.on( 'content:create:browseGlobalMedia', this.browseGlobalMediaContent, this );
+	    },
+
+	    /**
+	     * Render callback for the router region in the `browse` mode.
+	     *
+	     * @param {wp.media.view.Router} routerView
+	     */
+	    browseRouter: function( routerView ) {
+	        routerView.set({
+	            upload: {
+	                text:     wp.media.view.l10n.uploadFilesTitle,
+	                priority: 20
+	            },
+	            browse: {
+	                text:     wp.media.view.l10n.mediaLibraryTitle,
+	                priority: 40
+	            },
+	            browseGlobalMedia: {
+	                text:     'Global Media',
+	                priority: 60
+	            },
+	        });
+	    },
+
+	    /**
+	     * Render callback for the content region in the `browse` mode.
+	     *
+	     * @param {wp.media.controller.Region} contentRegion
+	     */
+	    browseContent: function( contentRegion ) {
+	        var state = this.state();
+	        var options = this.options;
+
+
+	        state.set( 'library', wp.media.query(_.defaults({
+
+	            }, options.library )) );
+
+
+	        wp.media.controller.Library.prototype.initialize.apply( state, arguments );
+
+	        this.$el.removeClass('hide-toolbar');
+
+	        // Browse our library of attachments.
+	        contentRegion.view = new wp.media.view.AttachmentsBrowser({
+	            controller: this,
+	            collection: state.get('library'),
+	            selection:  state.get('selection'),
+	            model:      state,
+	            sortable:   state.get('sortable'),
+	            search:     state.get('searchable'),
+	            filters:    state.get('filterable'),
+	            date:       state.get('date'),
+	            display:    state.has('display') ? state.get('display') : state.get('displaySettings'),
+	            dragInfo:   state.get('dragInfo'),
+
+	            idealColumnWidth: state.get('idealColumnWidth'),
+	            suggestedWidth:   state.get('suggestedWidth'),
+	            suggestedHeight:  state.get('suggestedHeight'),
+
+	            AttachmentView: state.get('AttachmentView')
+	        });
+	    },
+
+	    /**
+	     * Render callback for the content region in the `browse` mode.
+	     *
+	     * @param {wp.media.controller.Region} contentRegion
+	     */
+	    browseGlobalMediaContent: function( contentRegion ) {
+	        var state = this.state();
+	        var options = this.options;
+
+
+	        state.set( 'library', wp.media.query(_.defaults({
+	                // Adding a new query parameter
+	                'global_media': true,
+
+	            }, options.library )) );
+
+
+	        wp.media.controller.Library.prototype.initialize.apply( state, arguments );
+
+	        this.$el.removeClass('hide-toolbar');
+
+	        // Browse our library of attachments.
+	        contentRegion.view = new wp.media.view.AttachmentsBrowser({
+	            controller: this,
+	            collection: state.get('library'),
+	            selection:  state.get('selection'),
+	            model:      state,
+	            sortable:   state.get('sortable'),
+	            search:     state.get('searchable'),
+	            filters:    state.get('filterable'),
+	            date:       state.get('date'),
+	            display:    state.has('display') ? state.get('display') : state.get('displaySettings'),
+	            dragInfo:   state.get('dragInfo'),
+
+	            idealColumnWidth: state.get('idealColumnWidth'),
+	            suggestedWidth:   state.get('suggestedWidth'),
+	            suggestedHeight:  state.get('suggestedHeight'),
+
+	            AttachmentView: state.get('AttachmentView')
+	        });
+	    },
+	});
+
 } )( window.wp, jQuery );
