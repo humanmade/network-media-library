@@ -236,7 +236,7 @@ var gm = gm || {};
 	        _.defaults( this.options, {
 	            multiple:  true,
 	            editing:   false,
-	            state:    'insert'
+	            state:    'library'
 	        });
 
 	        this.createSelection();
