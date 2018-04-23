@@ -41,6 +41,8 @@ The plugin is also available as [Composer package](https://packagist.org/package
 ### Screenshots
  ![Media Modal](./assets/screenshot-1.png)
 
+ ![Usage in Featured Image](./assets/screenshot-2.png)
+ 
 ## Other Notes
 
 ### Crafted by [Inpsyde](https://inpsyde.com) &middot; Engineering the web since 2006.
