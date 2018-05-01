@@ -230,3 +230,130 @@ function ajax_get_attachment()
     wp_ajax_get_attachment();
     exit();
 }
+
+add_action( 'save_post', __NAMESPACE__ . '\save_thumbnail_meta', 99);
+/**
+ * Fires once a post has been saved.
+ *
+ * @since 1.5.0
+ *
+ * @param int     $post_ID Post ID.
+ * @param WP_Post $post    Post object.
+ * @param bool    $update  Whether this is an existing post being updated or not.
+ */
+function save_thumbnail_meta($post_id) {
+
+    $id_prefix = get_site_id() . '00000';
+    if ($_POST['_thumbnail_id'] && false !== strpos($_POST['_thumbnail_id'], $id_prefix)) {
+        update_post_meta($post_id, '_thumbnail_id', $_POST['_thumbnail_id']);
+        update_post_meta($post_id, 'global_media_site_id', get_site_id());
+    }
+
+}
+
+add_action('wp_ajax_get-post-thumbnail-html', __NAMESPACE__ . '\ajax_get_post_thumbnail_html', 99);
+/**
+ * Ajax handler for retrieving HTML for the featured image.
+ *
+ * @since 4.6.0
+ */
+function ajax_get_post_thumbnail_html()
+{
+    $id_prefix = get_site_id() . '00000';
+
+    if (false !== strpos($thumbnail_id, $id_prefix)) {
+        $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
+
+        switch_to_blog(get_site_id());
+        $return = _wp_post_thumbnail_html( $thumbnail_id, $post_id );
+        restore_current_blog();
+
+        $post               = get_post( $post_ID );
+        $post_type_object   = get_post_type_object( $post->post_type );
+
+        $search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
+        $replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
+        $return = str_replace($search, $replace, $return);
+
+    }
+    else {
+        $return = _wp_post_thumbnail_html( $thumbnail_id, $post_ID );
+    }
+
+    wp_send_json_success( $return );
+}
+
+add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3);
+/**
+     * Filters the admin post thumbnail HTML markup to return.
+     *
+     *
+     * @param string $content      Admin post thumbnail HTML markup.
+     * @param int    $post_id      Post ID.
+     * @param int    $thumbnail_id Thumbnail ID.
+     */
+
+function admin_post_thumbnail_html ( $content, $post_id, $thumbnail_id ) {
+// var_dump(get_post_meta( $post_id));
+    $site_id = get_post_meta( $post_id, 'global_media_site_id', true );
+    $id_prefix = get_site_id() . '00000';
+
+    if (false !== strpos($thumbnail_id, $id_prefix)) {
+        $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
+
+        switch_to_blog($site_id);
+        $content = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id ); //$thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
+        restore_current_blog();
+
+        $search  = 'value="'.$thumbnail_id.'"';
+        $replace = 'value="'.$id_prefix.$thumbnail_id.'"';
+        $content = str_replace($search, $replace, $content);
+
+        $post               = get_post( $post_id );
+        $post_type_object   = get_post_type_object( $post->post_type );
+
+        $search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
+        $replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
+        $content = str_replace($search, $replace, $content);
+    }
+
+    return $content;
+
+}
+
+add_filter( 'post_thumbnail_html', __NAMESPACE__ . '\post_thumbnail_html', 99, 5);
+/**
+     * Filters the post thumbnail HTML.
+     *
+     * @since 2.9.0
+     *
+     * @param string       $html              The post thumbnail HTML.
+     * @param int          $post_id           The post ID.
+     * @param string       $post_thumbnail_id The post thumbnail ID.
+     * @param string|array $size              The post thumbnail size. Image size or array of width and height
+     *                                        values (in that order). Default 'post-thumbnail'.
+     * @param string       $attr              Query string of attributes.
+     */
+
+function post_thumbnail_html($html, $post_id, $post_thumbnail_id, $size, $attr) {
+
+    $site_id = get_post_meta( $post_id, 'global_media_site_id', true );
+    $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
+    $id_prefix = $site_id . '00000';
+
+    if (false !== strpos($thumbnail_id, $id_prefix)) {
+        $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
+
+            if (intval($site_id) && intval($thumbnail_id)) {
+
+            switch_to_blog($site_id);
+
+            $html = wp_get_attachment_image( $thumbnail_id, $size, false, $attr );
+
+            restore_current_blog();
+        }
+
+    }
+
+    return $html;
+}
