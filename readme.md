@@ -2,7 +2,11 @@
 _Multisite Global Media_ is a WordPress plugin which shares media across the Multisite network.
 
 ## Description
-This small plugin adds a new tab to the media modal which gives you the opportunity to share media from one site to all the other sites of the network. The `multisite-global-media.php` file uses the ID of the site that will store the global media. Currently the Site ID is set at `const SITE_ID = 3`. Change this value to set one of the other sites as the default for storing global media. You can also set/change this Site ID via filter hook `global_media.site_id`, like `add_filter( 'global_media.site_id', 1234 );`.
+This small plugin adds a new tab to the media modal which gives you the opportunity to share media from one site to all the other sites of the network. The `multisite-global-media.php` file uses the ID of the site that will store the global media. Currently the Site ID is set at `const SITE_ID = 3`. Change this value to set one of the other sites as the default for storing global media. You can also set/change this Site ID via filter hook `global_media.site_id`, like
+
+    add_filter( 'global_media.site_id', function() {
+        return 1234;
+    } );
 
 To get Global Media to work one has to follow these steps:
 
@@ -22,7 +26,7 @@ To get Global Media to work one has to follow these steps:
  const SITE_ID = 3;
  ```
 
-Normally we you should not change the source. It is much easier for maintenance and other points. So if you familiar with code in the WordPress context, use the hook below to change the default Site ID of the plugin with a small custom plugin.
+Normally you should not change the source. It is much easier for maintenance and other points. So if you are familiar with code in the WordPress context, use the hook below to change the default Site ID of the plugin with a small custom plugin.
 
 #### Hook for Site ID
 The plugin defines the hook `global_media.site_id` to set an ID for the network Site, that store the media files, like `add_filter( 'global_media.site_id', 1234 );`.
@@ -30,8 +34,8 @@ The plugin defines the hook `global_media.site_id` to set an ID for the network 
 ### Installation
 * Download the plugin as zip, use a clone of the repo or use Composer, see below
 * Install the plugin in your environment, recommend as [Must Use plugin](https://codex.wordpress.org/Must_Use_Plugins), also here a small [hint](https://github.com/bueltge/must-use-loader) for an helping solution [Must Use Loader](https://github.com/bueltge/must-use-loader).
-* Set the side ID for the Global Mediathek, see above the description to change them inside the source or use the hook.
-* Active the plugin for the hole network
+* Set the side ID for the Global Media Library, see above the description to change them inside the source or use the hook.
+* Active the plugin for the whole network
 
 #### Composer
 The plugin is also available as [Composer package](https://packagist.org/packages/bueltge/multisite-global-media).
