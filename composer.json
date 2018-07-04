@@ -1,18 +1,21 @@
 {
   "name": "bueltge/multisite-global-media",
-  "type": "wordpress-plugin",
+  "type": "wordpress-muplugin",
   "description": "Multisite Global Media is a WordPress plugin which shares media across the Multisite network.",
-  "keywords": ["wordpress", "plugin", "multisite"],
+  "keywords": ["wordpress", "muplugin", "multisite"],
   "homepage": "https://github.com/bueltge/Multisite-Global-Media",
   "license": "MIT",
   "authors": [
     {
       "name": "Dominik Schilling",
-      "homepage": "https://dominikschilling.de/"
+      "homepage": "https://dominikschilling.de/",
+      "role": "Developer"
     },
     {
       "name": "Frank Bültge",
-      "homepage": "https://bueltge.de/"
+      "email": "frank@bueltge.de",
+      "homepage": "https://bueltge.de",
+      "role": "Developer"
     }
   ],
   "require": {
