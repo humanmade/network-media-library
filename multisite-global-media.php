@@ -12,7 +12,7 @@
  * Text Domain: global_media
  * Domain Path: /languages
  *
- * Php Version 5.3
+ * Php Version 5.4
  *
  * @package WordPress
  * @author  Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
@@ -40,6 +40,13 @@ defined('ABSPATH') || die();
 const SITE_ID = 3;
 
 /**
+ * ID of the actual current site ID, used while switching between sites.
+ *
+ * @var integer
+ */
+$GLOBALS['_mgm_current_site_id'] = get_current_blog_id();
+
+/**
  * Return the ID of site that store the media files.
  *
  * @since  2017-12-01
@@ -51,30 +58,58 @@ function get_site_id()
     return (int)apply_filters('global_media.site_id', SITE_ID);
 }
 
-add_action('admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_scripts');
 /**
- * Enqueue script for media modal
- *
- * @since  2015-01-26
+ * Switches the current site ID to the global media library site ID.
  */
-function enqueue_scripts()
-{
-
-    if ('post' !== get_current_screen()->base) {
-        return;
-    }
-
-    wp_enqueue_script(
-        'global_media',
-        plugins_url('assets/js/global-media.js', __FILE__),
-        array('media-views'),
-        '0.1',
-        true
-    );
-    wp_enqueue_script('global_media');
+function switch_to_site_id() {
+    switch_to_blog( get_site_id() );
 }
 
-add_action('admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_styles');
+add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
+/**
+ * Filters a user's capabilities so they can be altered at runtime.
+ *
+ * This is used to prevent access to anything on the Media site except for managing media.
+ *
+ * Important: This does not get called for Super Admins.
+ *
+ * @param bool[]   $user_caps     Concerned user's capabilities.
+ * @param string[] $required_caps Required primitive capabilities for the requested capability.
+ * @param array    $args {
+ *     Arguments that accompany the requested capability check.
+ *
+ *     @type string    $0 Requested capability.
+ *     @type int       $1 Concerned user ID.
+ *     @type mixed  ...$2 Optional second and further parameters.
+ * }
+ * @param WP_User  $user          Concerned user object.
+ * @return bool[] Concerned user's capabilities.
+ */
+function filter_user_has_cap( array $user_caps, array $required_caps, array $args, \WP_User $user ) {
+    if ( $GLOBALS['_mgm_current_site_id'] != get_site_id() ) {
+        return $user_caps;
+    }
+
+    $allowed_on_media_site = [
+        'read',
+        'upload_files',
+    ];
+
+    if ( in_array( $args[0], $allowed_on_media_site, true ) ) {
+        return $user_caps;
+    }
+
+    if ( 'edit_post' === $args[0] ) {
+        $post = get_post( $args[2] );
+        if ( $post && 'attachment' === $post->post_type ) {
+            return $user_caps;
+        }
+    }
+
+    return [];
+}
+
+add_action('admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles');
 /**
  * Enqueue script for media modal
  *
@@ -82,205 +117,17 @@ add_action('admin_enqueue_scripts', __NAMESPACE__ . '\enqueue_styles');
  */
 function enqueue_styles()
 {
+    ?>
+    <style>
+        .wp-filter .media-grid-view-switch a {
+            width: 0;
+        }
 
-    if ('post' !== get_current_screen()->base) {
-        return;
-    }
-
-    wp_register_style(
-        'global_media',
-        plugins_url('assets/css/global-media.css', __FILE__),
-        array(),
-        '0.1'
-    );
-    wp_enqueue_style('global_media');
-}
-
-add_filter('media_view_strings', __NAMESPACE__ . '\get_media_strings');
-/**
- * Define Strings for translation
- *
- * @since   2015-01-26
- * @param $strings
- *
- * @return mixed
- */
-function get_media_strings($strings)
-{
-
-    $strings['globalMediaTitle'] = esc_html__('Global Media', 'global_media');
-    return $strings;
-}
-
-/**
- * Prepare media for javascript
- *
- * @since   2015-01-26
- * @param $response
- *
- * @return mixed
- */
-function prepare_attachment_for_js($response)
-{
-
-    $id_prefix = get_site_id() . '00000';
-
-    $response['id']               = $id_prefix . $response['id']; // Unique ID, must be a number.
-    $response['nonces']['update'] = false;
-    $response['nonces']['edit']   = false;
-    $response['nonces']['delete'] = false;
-    $response['editLink']         = false;
-
-    return $response;
-}
-
-add_action('wp_ajax_query-attachments', __NAMESPACE__ . '\ajax_query_attachments', 0);
-/**
- * Same as wp_ajax_query_attachments() but with switch_to_blog support.
- *
- * @since   2015-01-26
- * @return void
- */
-function ajax_query_attachments()
-{
-
-    $query = isset($_REQUEST['query']) ? (array)$_REQUEST['query'] : array();
-
-    if (!empty($query['global_media'])) {
-        switch_to_blog(get_site_id());
-
-        add_filter('wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js');
-    }
-
-    wp_ajax_query_attachments();
-    exit;
-}
-
-/**
- * Send media to editor
- *
- * @since   2015-01-26
- * @param $html
- * @param $id
- *
- * @return mixed
- */
-function media_send_to_editor($html, $id)
-{
-
-    $id_prefix = get_site_id() . '00000';
-    $new_id    = $id_prefix . $id; // Unique ID, must be a number.
-
-    $search  = 'wp-image-' . $id;
-    $replace = 'wp-image-' . $new_id;
-    $html    = str_replace($search, $replace, $html);
-
-    return $html;
-}
-
-add_action('wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\ajax_send_attachment_to_editor', 0);
-/**
- * Send media via AJAX call to editor
- *
- * @since   2015-01-26
- * @return  void
- */
-function ajax_send_attachment_to_editor()
-{
-
-    $attachment = wp_unslash($_POST['attachment']);
-    $id         = $attachment['id'];
-    $id_prefix  = get_site_id() . '00000';
-
-    if (false !== strpos($id, $id_prefix)) {
-        $attachment['id']    = str_replace($id_prefix, '', $id); // Unique ID, must be a number.
-        $_POST['attachment'] = wp_slash($attachment);
-
-        switch_to_blog(get_site_id());
-
-        add_filter('media_send_to_editor', __NAMESPACE__ . '\media_send_to_editor', 10, 2);
-    }
-
-    wp_ajax_send_attachment_to_editor();
-    exit();
-}
-
-add_action('wp_ajax_get-attachment', __NAMESPACE__ . '\ajax_get_attachment', 0);
-/**
- * Get attachment
- *
- * @since   2015-01-26
- * @return  void
- */
-function ajax_get_attachment()
-{
-
-    $id        = $_REQUEST['id'];
-    $id_prefix = get_site_id() . '00000';
-
-    if (false !== strpos($id, $id_prefix)) {
-        $id             = str_replace($id_prefix, '', $id); // Unique ID, must be a number.
-        $_REQUEST['id'] = $id;
-
-        switch_to_blog(get_site_id());
-        add_filter('wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js');
-        restore_current_blog();
-    }
-
-    wp_ajax_get_attachment();
-    exit();
-}
-
-add_action( 'save_post', __NAMESPACE__ . '\save_thumbnail_meta', 99);
-/**
- * Fires once a post has been saved.
- *
- * @since 1.5.0
- *
- * @param int     $post_ID Post ID.
- * @param WP_Post $post    Post object.
- * @param bool    $update  Whether this is an existing post being updated or not.
- */
-function save_thumbnail_meta($post_id) {
-
-    $id_prefix = get_site_id() . '00000';
-    if ($_POST['_thumbnail_id'] && false !== strpos($_POST['_thumbnail_id'], $id_prefix)) {
-        update_post_meta($post_id, '_thumbnail_id', $_POST['_thumbnail_id']);
-        update_post_meta($post_id, 'global_media_site_id', get_site_id());
-    }
-
-}
-
-add_action('wp_ajax_get-post-thumbnail-html', __NAMESPACE__ . '\ajax_get_post_thumbnail_html', 99);
-/**
- * Ajax handler for retrieving HTML for the featured image.
- *
- * @since 4.6.0
- */
-function ajax_get_post_thumbnail_html()
-{
-    $id_prefix = get_site_id() . '00000';
-
-    if (false !== strpos($thumbnail_id, $id_prefix)) {
-        $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
-
-        switch_to_blog(get_site_id());
-        $return = _wp_post_thumbnail_html( $thumbnail_id, $post_id );
-        restore_current_blog();
-
-        $post               = get_post( $post_ID );
-        $post_type_object   = get_post_type_object( $post->post_type );
-
-        $search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
-        $replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
-        $return = str_replace($search, $replace, $return);
-
-    }
-    else {
-        $return = _wp_post_thumbnail_html( $thumbnail_id, $post_ID );
-    }
-
-    wp_send_json_success( $return );
+        .wp-filter .media-grid-view-switch a::before {
+            display: none;
+        }
+    </style>
+    <?php
 }
 
 add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3);
@@ -294,28 +141,24 @@ add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_
      */
 
 function admin_post_thumbnail_html ( $content, $post_id, $thumbnail_id ) {
-// var_dump(get_post_meta( $post_id));
-    $site_id = get_post_meta( $post_id, 'global_media_site_id', true );
-    $id_prefix = get_site_id() . '00000';
+    static $fetching_global_media = false;
 
-    if (false !== strpos($thumbnail_id, $id_prefix)) {
-        $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
-
-        switch_to_blog($site_id);
-        $content = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id ); //$thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
-        restore_current_blog();
-
-        $search  = 'value="'.$thumbnail_id.'"';
-        $replace = 'value="'.$id_prefix.$thumbnail_id.'"';
-        $content = str_replace($search, $replace, $content);
-
-        $post               = get_post( $post_id );
-        $post_type_object   = get_post_type_object( $post->post_type );
-
-        $search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
-        $replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
-        $content = str_replace($search, $replace, $content);
+    if ( $fetching_global_media ) {
+        return $content;
     }
+
+    switch_to_blog(get_site_id());
+    $fetching_global_media = true;
+    $content = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id ); //$thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
+    $fetching_global_media = false;
+    restore_current_blog();
+
+    $post               = get_post( $post_id );
+    $post_type_object   = get_post_type_object( $post->post_type );
+
+    $search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
+    $replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
+    $content = str_replace($search, $replace, $content);
 
     return $content;
 
@@ -336,24 +179,112 @@ add_filter( 'post_thumbnail_html', __NAMESPACE__ . '\post_thumbnail_html', 99, 5
      */
 
 function post_thumbnail_html($html, $post_id, $post_thumbnail_id, $size, $attr) {
+    switch_to_blog( get_site_id() );
 
-    $site_id = get_post_meta( $post_id, 'global_media_site_id', true );
-    $thumbnail_id = get_post_meta($post_id, '_thumbnail_id', true);
-    $id_prefix = $site_id . '00000';
+    $html = wp_get_attachment_image( $post_thumbnail_id, $size, false, $attr );
 
-    if (false !== strpos($thumbnail_id, $id_prefix)) {
-        $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
-
-            if (intval($site_id) && intval($thumbnail_id)) {
-
-            switch_to_blog($site_id);
-
-            $html = wp_get_attachment_image( $thumbnail_id, $size, false, $attr );
-
-            restore_current_blog();
-        }
-
-    }
+    restore_current_blog();
 
     return $html;
 }
+
+// Allow users to upload attachments.
+add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_site_id', 0 );
+
+// Disallow access to the "List" mode on the Media screen.
+add_action( 'load-upload.php', function() {
+    $_GET['mode'] = 'grid';
+}, 0 );
+
+// Allow attachment details to be fetched and saved.
+add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_save-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_save-attachment-compat', __NAMESPACE__ . '\switch_to_site_id', 0 );
+
+// Allow images to be edited and previewed.
+add_action( 'wp_ajax_image-editor', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_imgedit-preview', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_crop-image', __NAMESPACE__ . '\switch_to_site_id', 0 );
+
+// Allow attachments to be queried and inserted.
+add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_site_id', 0 );
+
+/**
+ * Filters the attachment data prepared for JavaScript.
+ *
+ * @param array      $response   Array of prepared attachment data.
+ * @param int|object $attachment Attachment ID or object.
+ * @param array      $meta       Array of attachment meta data.
+ * @return array Array of prepared attachment data.
+ */
+add_filter( 'wp_prepare_attachment_for_js', function( $response, $attachment, $meta ) {
+    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+        return $response;
+    }
+
+    // Prevent media from being deleted from any site other than the global media site.
+    // This is needed in order to prevent incorrect posts from being deleted on the local site.
+    unset( $response['nonces']['delete'] );
+
+    return $response;
+}, 0, 3 );
+
+/**
+ * A class which handles saving the post's featured image ID.
+ *
+ * This handling is required because `wp_insert_post()` checks the validity of the featured image
+ * ID before saving it to post meta, and deletes it if it's not an image/audio/video. In order to
+ * override this handling, two consecutive hooks are required to temporarily store the ID of the
+ * selected featured image and then to save it again after the post has been saved.
+ */
+class Post_Thumbnail_Saver {
+
+    /**
+     * Stores the featured image ID for a post ID.
+     *
+     * @var int[] Array of featured image IDs keyed by their post ID.
+     */
+    protected $thumbnail_ids = [];
+
+    /**
+     * Sets up the necessary action and filter callbacks.
+     */
+    public function __construct() {
+        add_filter( 'wp_insert_post_data', [ $this, 'filter_wp_insert_post_data' ], 10, 2 );
+        add_action( 'save_post',           [ $this, 'action_save_post' ], 10, 3 );
+    }
+
+    /**
+     * Temporarily stores the ID of the featured image for the given post ID when the post is saved.
+     *
+     * @param array $data    An array of slashed post data.
+     * @param array $postarr An array of sanitized, but otherwise unmodified post data.
+     * @return array An array of slashed post data.
+     */
+    public function filter_wp_insert_post_data( $data, $postarr ) {
+        if ( ! empty( $postarr['_thumbnail_id'] ) ) {
+            $this->thumbnail_ids[ $postarr['ID'] ] = intval( $postarr['_thumbnail_id'] );
+        }
+
+        return $data;
+    }
+
+    /**
+     * Re-saves the featured image ID for the given post.
+     *
+	 * @param int     $post_ID Post ID.
+	 * @param WP_Post $post    Post object.
+	 * @param bool    $update  Whether this is an existing post being updated or not.
+     */
+    public function action_save_post( $post_id, $post, $update ) {
+        if ( empty( $this->thumbnail_ids[ $post->ID ] ) || -1 === $this->thumbnail_ids[ $post->ID ] ) {
+            delete_post_meta( $post->ID, '_thumbnail_id' );
+        } else {
+            update_post_meta( $post->ID, '_thumbnail_id', $this->thumbnail_ids[ $post->ID ] );
+        }
+    }
+
+}
+
+new Post_Thumbnail_Saver;
