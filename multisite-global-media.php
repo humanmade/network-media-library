@@ -244,9 +244,9 @@ add_action( 'save_post', __NAMESPACE__ . '\save_thumbnail_meta', 99);
 function save_thumbnail_meta($post_id) {
 
     $id_prefix = get_site_id() . '00000';
-    if ($_POST['_thumbnail_id'] && false !== strpos($_POST['_thumbnail_id'], $id_prefix)) {
-        update_post_meta($post_id, '_thumbnail_id', $_POST['_thumbnail_id']);
-        update_post_meta($post_id, 'global_media_site_id', get_site_id());
+    if ( ! empty( $_POST['_thumbnail_id'] ) && false !== strpos( $_POST['_thumbnail_id'], $id_prefix ) ) {
+        update_post_meta( $post_id, '_thumbnail_id', intval( $_POST['_thumbnail_id'] ) );
+        update_post_meta( $post_id, 'global_media_site_id', get_site_id() );
     }
 
 }
