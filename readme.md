@@ -2,7 +2,7 @@
 _Multisite Global Media_ is a WordPress plugin which shares media across the Multisite network.
 
 ## Description
-This small plugin adds a new tab to the media modal which gives you the opportunity to share media from one site to all the other sites of the network. The `multisite-global-media.php` file uses the ID of the site that will store the global media. Currently the Site ID is set at `const SITE_ID = 3`. Change this value to set one of the other sites as the default for storing global media. You can also set/change this Site ID via filter hook `global_media.site_id`, like
+This small plugin adds a new tab to the media modal which gives you the opportunity to share media from one site to all the other sites of the network. The `multisite-global-media.php` file uses the ID of the site that will store the global media. Currently the Site ID is set at `const SITE_ID = 1`. Change this value to set one of the other sites as the default for storing global media. You can also set/change this Site ID via filter hook `global_media.site_id`, like
 
     add_filter( 'global_media.site_id', function() {
         return 1234;
@@ -23,13 +23,15 @@ To get Global Media to work one has to follow these steps:
   * @var    integer
   * @since  2015-01-22
   */
- const SITE_ID = 3;
+ const SITE_ID = 1;
  ```
 
 Normally you should not change the source. It is much easier for maintenance and other points. So if you are familiar with code in the WordPress context, use the hook below to change the default Site ID of the plugin with a small custom plugin.
 
 #### Hook for Site ID
-The plugin defines the hook `global_media.site_id` to set an ID for the network Site, that store the media files, like `add_filter( 'global_media.site_id', 1234 );`.
+The plugin defines the hook `global_media.site_id` to set an ID for the network Site, that store the media files, like `add_filter( 'global_media.site_id', function() {
+        return 1234;
+    } );`.
 
 ### Installation
 * Download the plugin as zip, use a clone of the repo or use Composer, see below
@@ -46,7 +48,7 @@ The plugin is also available as [Composer package](https://packagist.org/package
  ![Media Modal](./assets/screenshot-1.png)
 
  ![Usage in Featured Image](./assets/screenshot-2.png)
- 
+
 ## Other Notes
 
 ### Crafted by [Inpsyde](https://inpsyde.com) &middot; Engineering the web since 2006.
