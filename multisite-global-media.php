@@ -294,8 +294,12 @@ add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_
      */
 
 function admin_post_thumbnail_html ( $content, $post_id, $thumbnail_id ) {
-// var_dump(get_post_meta( $post_id));
+
     $site_id = get_post_meta( $post_id, 'global_media_site_id', true );
+    if ( empty( $site_id ) ) {
+        $site_id = get_site_id();
+    }
+
     $id_prefix = get_site_id() . '00000';
 
     if (false !== strpos($thumbnail_id, $id_prefix)) {
