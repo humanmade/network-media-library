@@ -37,7 +37,7 @@ defined('ABSPATH') || die();
  * @var    integer
  * @since  2015-01-22
  */
-const SITE_ID = 3;
+const SITE_ID = 1;
 
 /**
  * Return the ID of site that store the media files.
