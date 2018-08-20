@@ -38,7 +38,7 @@ defined('ABSPATH') || die();
  * @var    integer
  * @since  2015-01-22
  */
-const SITE_ID = 3;
+const SITE_ID = 2;
 
 /**
  * ID of the actual current site ID, used while switching between sites.
