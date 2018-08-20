@@ -5,7 +5,7 @@
  * Description: Multisite Global Media is a WordPress plugin which shares media across the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/bueltge/multisite-global-media
- * Version:     0.0.5
+ * Version:     0.0.6
  * Author:      Dominik Schilling, Frank Bültge
  * License:     MIT
  * License URI: ./LICENSE
@@ -37,7 +37,7 @@ defined('ABSPATH') || die();
  * @var    integer
  * @since  2015-01-22
  */
-const SITE_ID = 3;
+const SITE_ID = 1;
 
 /**
  * Return the ID of site that store the media files.
@@ -71,6 +71,7 @@ function enqueue_scripts()
         '0.1',
         true
     );
+
     wp_enqueue_script('global_media');
 }
 
@@ -147,7 +148,8 @@ function ajax_query_attachments()
     $query = isset($_REQUEST['query']) ? (array)$_REQUEST['query'] : array();
 
     if (!empty($query['global_media'])) {
-        switch_to_blog(get_site_id());
+
+        switch_to_blog( get_site_id() );
 
         add_filter('wp_prepare_attachment_for_js', __NAMESPACE__ . '\prepare_attachment_for_js');
     }
@@ -244,9 +246,9 @@ add_action( 'save_post', __NAMESPACE__ . '\save_thumbnail_meta', 99);
 function save_thumbnail_meta($post_id) {
 
     $id_prefix = get_site_id() . '00000';
-    if ($_POST['_thumbnail_id'] && false !== strpos($_POST['_thumbnail_id'], $id_prefix)) {
-        update_post_meta($post_id, '_thumbnail_id', $_POST['_thumbnail_id']);
-        update_post_meta($post_id, 'global_media_site_id', get_site_id());
+    if ( ! empty( $_POST['_thumbnail_id'] ) && false !== strpos( $_POST['_thumbnail_id'], $id_prefix ) ) {
+        update_post_meta( $post_id, '_thumbnail_id', intval( $_POST['_thumbnail_id'] ) );
+        update_post_meta( $post_id, 'global_media_site_id', get_site_id() );
     }
 
 }
@@ -257,7 +259,7 @@ add_action('wp_ajax_get-post-thumbnail-html', __NAMESPACE__ . '\ajax_get_post_th
  *
  * @since 4.6.0
  */
-function ajax_get_post_thumbnail_html()
+function ajax_get_post_thumbnail_html( $post_id, $thumbnail_id )
 {
     $id_prefix = get_site_id() . '00000';
 
@@ -265,7 +267,8 @@ function ajax_get_post_thumbnail_html()
         $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
 
         switch_to_blog(get_site_id());
-        $return = _wp_post_thumbnail_html( $thumbnail_id, $post_id );
+
+        $return = _wp_post_thumbnail_html( $thumbnail_id, $post_ID );
         restore_current_blog();
 
         $post               = get_post( $post_ID );
@@ -277,6 +280,7 @@ function ajax_get_post_thumbnail_html()
 
     }
     else {
+
         $return = _wp_post_thumbnail_html( $thumbnail_id, $post_ID );
     }
 
@@ -294,34 +298,51 @@ add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_
      */
 
 function admin_post_thumbnail_html ( $content, $post_id, $thumbnail_id ) {
-// var_dump(get_post_meta( $post_id));
+
     $site_id = get_post_meta( $post_id, 'global_media_site_id', true );
+    if ( empty( $site_id ) ) {
+        $site_id = get_site_id();
+    }
+
     $id_prefix = get_site_id() . '00000';
 
-    if (false !== strpos($thumbnail_id, $id_prefix)) {
-        $thumbnail_id = str_replace($id_prefix, '', $thumbnail_id); // Unique ID, must be a number.
-
-        switch_to_blog($site_id);
-        $content = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id ); //$thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
-        restore_current_blog();
-
-        $search  = 'value="'.$thumbnail_id.'"';
-        $replace = 'value="'.$id_prefix.$thumbnail_id.'"';
-        $content = str_replace($search, $replace, $content);
-
-        $post               = get_post( $post_id );
-        $post_type_object   = get_post_type_object( $post->post_type );
-
-        $search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
-        $replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
-        $content = str_replace($search, $replace, $content);
+    if ( false === strpos( $thumbnail_id, $id_prefix ) ) {
+        return $content;
     }
+
+    $thumbnail_id = str_replace( $id_prefix, '', $thumbnail_id ); // Unique ID, must be a number.
+
+    switch_to_blog( $site_id );
+
+    // $thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
+    $content = _wp_post_thumbnail_html( $thumbnail_id, $post_id );
+
+    restore_current_blog();
+
+    $search  = 'value="' . $thumbnail_id . '"';
+    $replace = 'value="' . $id_prefix . $thumbnail_id . '"';
+    $content = str_replace( $search, $replace, $content );
+
+    $post             = get_post( $post_id );
+    $post_type_object = null;
+
+    $remove_image_label = _x( 'Remove featured image', 'post' );
+    if ( $post !== null ) {
+        $post_type_object = get_post_type_object( $post->post_type );
+    }
+    if ( $post_type_object !== null ) {
+        $remove_image_label = $post_type_object->labels->remove_featured_image;
+    }
+
+    $search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
+    $replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $remove_image_label ) . '</a></p>';
+    $content = str_replace( $search, $replace, $content );
 
     return $content;
 
 }
-
 add_filter( 'post_thumbnail_html', __NAMESPACE__ . '\post_thumbnail_html', 99, 5);
+
 /**
      * Filters the post thumbnail HTML.
      *
