@@ -53,7 +53,7 @@ $GLOBALS['_mgm_current_site_id'] = get_current_blog_id();
  * @since  2017-12-01
  * @return integer The site ID.
  */
-function get_site_id()
+function get_site_id() : int
 {
 
     return (int)apply_filters('global_media.site_id', SITE_ID);
@@ -86,7 +86,7 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
  * @param WP_User  $user          Concerned user object.
  * @return bool[] Concerned user's capabilities.
  */
-function filter_user_has_cap( array $user_caps, array $required_caps, array $args, \WP_User $user ) {
+function filter_user_has_cap( array $user_caps, array $required_caps, array $args, \WP_User $user ) : array {
     if ( $GLOBALS['_mgm_current_site_id'] != get_site_id() ) {
         return $user_caps;
     }
@@ -141,7 +141,7 @@ add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_
      * @param int    $thumbnail_id Thumbnail ID.
      */
 
-function admin_post_thumbnail_html ( $content, $post_id, $thumbnail_id ) {
+function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) : string {
     static $fetching_global_media = false;
 
     if ( $fetching_global_media ) {
@@ -226,7 +226,7 @@ add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_sit
  * @param array   $meta       Array of attachment meta data.
  * @return array Array of prepared attachment data.
  */
-add_filter( 'wp_prepare_attachment_for_js', function( $response, $attachment, $meta ) {
+add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, array $meta ) : array {
     if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
         return $response;
     }
@@ -270,7 +270,7 @@ class Post_Thumbnail_Saver {
      * @param array $postarr An array of sanitized, but otherwise unmodified post data.
      * @return array An array of slashed post data.
      */
-    public function filter_wp_insert_post_data( $data, $postarr ) {
+    public function filter_wp_insert_post_data( array $data, array $postarr ) : array {
         if ( ! empty( $postarr['_thumbnail_id'] ) ) {
             $this->thumbnail_ids[ $postarr['ID'] ] = intval( $postarr['_thumbnail_id'] );
         }
@@ -285,7 +285,7 @@ class Post_Thumbnail_Saver {
 	 * @param WP_Post $post    Post object.
 	 * @param bool    $update  Whether this is an existing post being updated or not.
      */
-    public function action_save_post( $post_id, $post, $update ) {
+    public function action_save_post( $post_id, \WP_Post $post, bool $update ) {
         if ( empty( $this->thumbnail_ids[ $post->ID ] ) || -1 === $this->thumbnail_ids[ $post->ID ] ) {
             delete_post_meta( $post->ID, '_thumbnail_id' );
         } else {
