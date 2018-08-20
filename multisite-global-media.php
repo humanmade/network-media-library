@@ -1,4 +1,5 @@
 <?php # -*- coding: utf-8 -*-
+declare(strict_types=1);
 
 /**
  * Plugin Name: Multisite Global Media
@@ -12,7 +13,7 @@
  * Text Domain: global_media
  * Domain Path: /languages
  *
- * Php Version 5.4
+ * Requires PHP: 7.0
  *
  * @package WordPress
  * @author  Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
