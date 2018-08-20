@@ -222,12 +222,12 @@ add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_sit
 /**
  * Filters the attachment data prepared for JavaScript.
  *
- * @param array   $response   Array of prepared attachment data.
- * @param WP_Post $attachment Attachment ID or object.
- * @param array   $meta       Array of attachment meta data.
+ * @param array      $response   Array of prepared attachment data.
+ * @param WP_Post    $attachment Attachment ID or object.
+ * @param array|bool $meta       Array of attachment meta data, or boolean false if there is none.
  * @return array Array of prepared attachment data.
  */
-add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, array $meta ) : array {
+add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, $meta ) : array {
     if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
         return $response;
     }
