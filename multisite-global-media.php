@@ -165,29 +165,36 @@ function admin_post_thumbnail_html ( $content, $post_id, $thumbnail_id ) {
 
 }
 
-add_filter( 'post_thumbnail_html', __NAMESPACE__ . '\post_thumbnail_html', 99, 5);
 /**
-     * Filters the post thumbnail HTML.
-     *
-     * @since 2.9.0
-     *
-     * @param string       $html              The post thumbnail HTML.
-     * @param int          $post_id           The post ID.
-     * @param string       $post_thumbnail_id The post thumbnail ID.
-     * @param string|array $size              The post thumbnail size. Image size or array of width and height
-     *                                        values (in that order). Default 'post-thumbnail'.
-     * @param string       $attr              Query string of attributes.
-     */
+ * Filters the image src result so its URL points to the media site.
+ *
+ * @param array|false  $image         Either array with src, width & height, icon src, or false.
+ * @param int          $attachment_id Image attachment ID.
+ * @param string|array $size          Size of image. Image size or array of width and height values.
+ * @param bool         $icon          Whether the image should be treated as an icon.
+ * @return array|false Either array with src, width & height, icon src, or false.
+ */
+add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $size, bool $icon ) {
+    static $switched = false;
 
-function post_thumbnail_html($html, $post_id, $post_thumbnail_id, $size, $attr) {
-    switch_to_blog( get_site_id() );
+    if ( $switched ) {
+        return $image;
+    }
 
-    $html = wp_get_attachment_image( $post_thumbnail_id, $size, false, $attr );
+    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+        return $image;
+    }
+
+    switch_to_site_id();
+
+    $switched = true;
+    $image    = wp_get_attachment_image_src( $attachment_id, $size, $icon );
+    $switched = false;
 
     restore_current_blog();
 
-    return $html;
-}
+    return $image;
+}, 999, 4 );
 
 // Allow users to upload attachments.
 add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_site_id', 0 );
