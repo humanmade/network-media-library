@@ -209,6 +209,7 @@ add_action( 'load-upload.php', function() {
 add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
 add_action( 'wp_ajax_save-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
 add_action( 'wp_ajax_save-attachment-compat', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_set-attachment-thumbnail', __NAMESPACE__ . '\switch_to_site_id', 0 );
 
 // Allow images to be edited and previewed.
 add_action( 'wp_ajax_image-editor', __NAMESPACE__ . '\switch_to_site_id', 0 );
