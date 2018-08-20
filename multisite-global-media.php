@@ -136,9 +136,9 @@ add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_
      * Filters the admin post thumbnail HTML markup to return.
      *
      *
-     * @param string $content      Admin post thumbnail HTML markup.
-     * @param int    $post_id      Post ID.
-     * @param int    $thumbnail_id Thumbnail ID.
+     * @param string   $content      Admin post thumbnail HTML markup.
+     * @param int      $post_id      Post ID.
+     * @param int|null $thumbnail_id Thumbnail attachment ID, or null if there isn't one.
      */
 
 function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) : string {
