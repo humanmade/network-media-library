@@ -148,6 +148,10 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
         return $content;
     }
 
+    if ( ! $thumbnail_id ) {
+        return $content;
+    }
+
     switch_to_blog(get_site_id());
     $fetching_global_media = true;
     $content = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id ); //$thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
