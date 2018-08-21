@@ -66,6 +66,13 @@ function switch_to_site_id() {
     switch_to_blog( get_site_id() );
 }
 
+/**
+ * Prevents attempts to attach an attachment to a post ID during upload.
+ */
+function prevent_attaching() {
+    unset( $_REQUEST['post_id'] );
+}
+
 add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
 /**
  * Filters a user's capabilities so they can be altered at runtime.
@@ -203,6 +210,10 @@ add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $si
 // Allow users to upload attachments.
 add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_site_id', 0 );
 add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
+
+// Allow attachments to be uploaded without a corresponding post on the media site.
+add_action( 'load-async-upload.php', __NAMESPACE__ . '\prevent_attaching', 0 );
+add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\prevent_attaching', 0 );
 
 // Disallow access to the "List" mode on the Media screen.
 add_action( 'load-upload.php', function() {
