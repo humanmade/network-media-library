@@ -135,6 +135,7 @@ function enqueue_styles()
             width: 0;
         }
 
+        .wp-core-ui .select-mode-toggle-button,
         .wp-filter .media-grid-view-switch a::before {
             display: none;
         }
