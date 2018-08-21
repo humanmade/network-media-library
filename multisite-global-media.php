@@ -241,6 +241,24 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
 }, 0, 3 );
 
 /**
+ * Filters the pre-calculated result of a REST dispatch request.
+ *
+ * @param mixed           $result  Response to replace the requested version with. Can be anything
+ *                                 a normal endpoint can return, or null to not hijack the request.
+ * @param WP_REST_Server  $this    Server instance.
+ * @param WP_REST_Request $request Request used to generate the response.
+ */
+add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
+    $route = '/wp/v2/media';
+
+    if ( 0 === strpos( $request->get_route(), $route ) ) {
+        switch_to_site_id();
+    }
+
+    return $result;
+}, 0, 3 );
+
+/**
  * A class which handles saving the post's featured image ID.
  *
  * This handling is required because `wp_insert_post()` checks the validity of the featured image
