@@ -276,6 +276,7 @@ add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP
     $route = '/wp/v2/media';
 
     if ( 0 === strpos( $request->get_route(), $route ) ) {
+        $request->set_param( 'post', null );
         switch_to_site_id();
     }
 
