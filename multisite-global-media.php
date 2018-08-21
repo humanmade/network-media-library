@@ -273,11 +273,17 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
  * @param WP_REST_Request $request Request used to generate the response.
  */
 add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
-    $route = '/wp/v2/media';
+    $media_routes = [
+        '/wp/v2/media',
+        '/regenerate-thumbnails/',
+    ];
 
-    if ( 0 === strpos( $request->get_route(), $route ) ) {
-        $request->set_param( 'post', null );
-        switch_to_site_id();
+    foreach ( $media_routes as $route ) {
+        if ( 0 === strpos( $request->get_route(), $route ) ) {
+            $request->set_param( 'post', null );
+            switch_to_site_id();
+            break;
+        }
     }
 
     return $result;
