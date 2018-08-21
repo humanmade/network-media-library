@@ -259,6 +259,24 @@ add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP
 }, 0, 3 );
 
 /**
+ * Fires after the XML-RPC user has been authenticated, but before the rest of the
+ * method logic begins, in order to switch to the media site when querying media.
+ *
+ * @param string $name The method name.
+ */
+add_action( 'xmlrpc_call', function( string $name ) {
+    $media_methods = [
+        'metaWeblog.newMediaObject',
+        'wp.getMediaItem',
+        'wp.getMediaLibrary',
+    ];
+
+    if ( in_array( $name, $media_methods, true ) ) {
+        switch_to_site_id();
+    }
+}, 0 );
+
+/**
  * A class which handles saving the post's featured image ID.
  *
  * This handling is required because `wp_insert_post()` checks the validity of the featured image
