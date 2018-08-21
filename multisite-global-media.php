@@ -125,6 +125,10 @@ add_action('admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles');
  */
 function enqueue_styles()
 {
+    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+        return;
+    }
+
     ?>
     <style>
         .wp-filter .media-grid-view-switch a {
@@ -217,6 +221,10 @@ add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\prevent_attaching', 0
 
 // Disallow access to the "List" mode on the Media screen.
 add_action( 'load-upload.php', function() {
+    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+        return;
+    }
+
     $_GET['mode'] = 'grid';
 }, 0 );
 
