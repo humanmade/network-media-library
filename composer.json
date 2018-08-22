@@ -1,6 +1,6 @@
 {
   "name": "johnbillion/network-media-library",
-  "type": "wordpress-plugin",
+  "type": "wordpress-muplugin",
   "description": "Network Media Library provides a central media library that's shared across all sites on the Multisite network.",
   "keywords": ["wordpress", "plugin", "multisite"],
   "homepage": "https://github.com/johnbillion/network-media-library",
@@ -12,11 +12,14 @@
     },
     {
       "name": "Dominik Schilling",
-      "homepage": "https://dominikschilling.de/"
+      "homepage": "https://dominikschilling.de/",
+      "role": "Developer"
     },
     {
       "name": "Frank Bültge",
-      "homepage": "https://bueltge.de/"
+      "email": "frank@bueltge.de",
+      "homepage": "https://bueltge.de",
+      "role": "Developer"
     }
   ],
   "require": {
