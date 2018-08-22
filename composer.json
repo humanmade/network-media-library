@@ -1,11 +1,15 @@
 {
-  "name": "bueltge/multisite-global-media",
+  "name": "johnbillion/network-media-library",
   "type": "wordpress-plugin",
-  "description": "Multisite Global Media is a WordPress plugin which shares media across the Multisite network.",
+  "description": "Network Media Library provides a central media library that's shared across all sites on the Multisite network.",
   "keywords": ["wordpress", "plugin", "multisite"],
-  "homepage": "https://github.com/bueltge/Multisite-Global-Media",
+  "homepage": "https://github.com/johnbillion/network-media-library",
   "license": "MIT",
   "authors": [
+    {
+      "name": "John Blackbourn",
+      "homepage": "https://johnblackbourn.com/"
+    },
     {
       "name": "Dominik Schilling",
       "homepage": "https://dominikschilling.de/"

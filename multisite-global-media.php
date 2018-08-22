@@ -2,26 +2,28 @@
 declare( strict_types=1 );
 
 /**
- * Plugin Name: Multisite Global Media
- * Description: Multisite Global Media is a WordPress plugin which shares media across the Multisite network.
+ * Network Media Library plugin for WordPress
+ *
+ * @package   network-media-library
+ * @link      https://github.com/johnbillion/network-media-library
+ * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
+ * @copyright 2018 John Blackbourn
+ * @license   https://opensource.org/licenses/MIT
+ *
+ * Plugin Name: Network Media Library
+ * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
- * Plugin URI:  https://github.com/bueltge/multisite-global-media
+ * Plugin URI:  https://github.com/johnbillion/network-media-library
  * Version:     0.0.5
- * Author:      Dominik Schilling, Frank Bültge
+ * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
  * License:     MIT
  * License URI: ./LICENSE
- * Text Domain: global_media
+ * Text Domain: network-media-library
  * Domain Path: /languages
- *
  * Requires PHP: 7.0
- *
- * @package WordPress
- * @author  Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
- * @license https://opensource.org/licenses/MIT
- * @version 2018-04-23
  */
 
-namespace Multisite_Global_Media;
+namespace Network_Media_Library;
 
 use WP_Post, WP_User;
 
@@ -35,7 +37,7 @@ defined( 'ABSPATH' ) || die();
  * Select the ID of the site/blog to where you want media
  *  that will be shared across the network to be stored.
  * Alternative change this value with the help
- *  of the filter hook 'global_media.site_id'.
+ *  of the filter hook 'network-media-library.site_id'.
  *
  * @var integer
  */
@@ -47,7 +49,7 @@ const SITE_ID = 2;
  * @return integer The site ID.
  */
 function get_site_id() : int {
-	return (int) apply_filters( 'global_media.site_id', SITE_ID );
+	return (int) apply_filters( 'network-media-library/site_id', SITE_ID );
 }
 
 /**
