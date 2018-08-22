@@ -23,10 +23,12 @@ declare(strict_types=1);
 
 namespace Multisite_Global_Media;
 
+use WP_Post, WP_User;
+
 /**
  * Don't call this file directly.
  */
-defined('ABSPATH') || die();
+defined( 'ABSPATH' ) || die();
 
 /**
  * Id of side inside the network, there store the global media.
@@ -48,7 +50,7 @@ const SITE_ID = 2;
  */
 function get_site_id() : int {
 
-	return (int)apply_filters('global_media.site_id', SITE_ID);
+	return (int) apply_filters( 'global_media.site_id', SITE_ID );
 }
 
 /**
@@ -66,7 +68,7 @@ function switch_to_media_site() {
  * @return bool Whether we're on the Media site.
  */
 function is_media_site() {
-	return ( (int) $GLOBALS['current_blog']->blog_id === get_site_id() );
+	return ( get_site_id() === (int) $GLOBALS['current_blog']->blog_id );
 }
 
 /**
@@ -96,7 +98,7 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
  * @param WP_User  $user          Concerned user object.
  * @return bool[] Concerned user's capabilities.
  */
-function filter_user_has_cap( array $user_caps, array $required_caps, array $args, \WP_User $user ) : array {
+function filter_user_has_cap( array $user_caps, array $required_caps, array $args, WP_User $user ) : array {
 	if ( ! is_media_site() ) {
 		return $user_caps;
 	}
@@ -120,7 +122,7 @@ function filter_user_has_cap( array $user_caps, array $required_caps, array $arg
 	return [];
 }
 
-add_action('admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles');
+add_action( 'admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles' );
 /**
  * Enqueue script for media modal
  *
@@ -145,16 +147,14 @@ function enqueue_styles() {
 	<?php
 }
 
-add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3);
+add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3 );
 /**
-	 * Filters the admin post thumbnail HTML markup to return.
-	 *
-	 *
-	 * @param string   $content      Admin post thumbnail HTML markup.
-	 * @param int      $post_id      Post ID.
-	 * @param int|null $thumbnail_id Thumbnail attachment ID, or null if there isn't one.
-	 */
-
+ * Filters the admin post thumbnail HTML markup to return.
+ *
+ * @param string   $content      Admin post thumbnail HTML markup.
+ * @param int      $post_id      Post ID.
+ * @param int|null $thumbnail_id Thumbnail attachment ID, or null if there isn't one.
+ */
 function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) : string {
 	static $fetching_global_media = false;
 
@@ -166,21 +166,21 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
 		return $content;
 	}
 
-	switch_to_blog(get_site_id());
+	switch_to_blog( get_site_id() );
 	$fetching_global_media = true;
-	$content = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id ); //$thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
+	// $thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
+	$content               = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id );
 	$fetching_global_media = false;
 	restore_current_blog();
 
-	$post               = get_post( $post_id );
-	$post_type_object   = get_post_type_object( $post->post_type );
+	$post             = get_post( $post_id );
+	$post_type_object = get_post_type_object( $post->post_type );
 
 	$search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
 	$replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
-	$content = str_replace($search, $replace, $content);
+	$content = str_replace( $search, $replace, $content );
 
 	return $content;
-
 }
 
 /**
@@ -334,7 +334,7 @@ class Post_Thumbnail_Saver {
 	 */
 	public function __construct() {
 		add_filter( 'wp_insert_post_data', [ $this, 'filter_wp_insert_post_data' ], 10, 2 );
-		add_action( 'save_post',           [ $this, 'action_save_post' ], 10, 3 );
+		add_action( 'save_post', [ $this, 'action_save_post' ], 10, 3 );
 	}
 
 	/**
@@ -355,11 +355,11 @@ class Post_Thumbnail_Saver {
 	/**
 	 * Re-saves the featured image ID for the given post.
 	 *
-	 * @param int     $post_ID Post ID.
+	 * @param int     $post_id Post ID.
 	 * @param WP_Post $post    Post object.
 	 * @param bool    $update  Whether this is an existing post being updated or not.
 	 */
-	public function action_save_post( $post_id, \WP_Post $post, bool $update ) {
+	public function action_save_post( $post_id, WP_Post $post, bool $update ) {
 		if ( empty( $this->thumbnail_ids[ $post->ID ] ) || -1 === $this->thumbnail_ids[ $post->ID ] ) {
 			delete_post_meta( $post->ID, '_thumbnail_id' );
 		} else {
@@ -369,4 +369,4 @@ class Post_Thumbnail_Saver {
 
 }
 
-new Post_Thumbnail_Saver;
+new Post_Thumbnail_Saver();
