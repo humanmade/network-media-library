@@ -1,66 +1,46 @@
-# Multisite Global Media
-_Multisite Global Media_ is a WordPress plugin which shares media across the Multisite network.
+# Network Media Library
+
+Network Media Library is a plugin for WordPress Multisite which provides a central media library that's shared across all sites on the Multisite network.
 
 ## Description
-This small plugin adds a new tab to the media modal which gives you the opportunity to share media from one site to all the other sites of the network. The `multisite-global-media.php` file uses the ID of the site that will store the global media. Currently the Site ID is set at `const SITE_ID = 3`. Change this value to set one of the other sites as the default for storing global media. You can also set/change this Site ID via filter hook `global_media.site_id`, like `add_filter( 'global_media.site_id', 1234 );`.
 
-To get Global Media to work one has to follow these steps:
+This small plugin transparently shares media from one central media library site to all the other sites on the network. All media that's uploaded gets transparently directed to the central media site, and subsequently made available network-wide.
 
-1. Decide on which blog/site that will host shared media for the network.
-2. Add media to the media library for the specific blog/site.
-4. Find the ID of a site by going to All Sites section hovering over the site checking the left bottom status bar or installing a plugin that shows the ID's of each site. An comfortable enhancement in the Multisite context is the plugin [Multisite Enhancement](https://github.com/bueltge/wordpress-multisite-enhancements).
-3. Open the file `multisite-global-media.php` go to the following code:
+Site ID `2` is used by default as the central media library. You can configure the media library site ID via the filter hook `network-media-library/site_id`:
 
- ```php
- /**
-  * Id of side inside the network, there store the global media
-  * Select the ID of the site/blog to where you want media that will be shared across the network to be stored.
-  *
-  * @var    integer
-  * @since  2015-01-22
-  */
- const SITE_ID = 3;
- ```
+```php
+add_filter( 'network-media-library/site_id', function( $site_id ) {
+    return 123;
+} );
+```
 
-Normally we you should not change the source. It is much easier for maintenance and other points. So if you familiar with code in the WordPress context, use the hook below to change the default Site ID of the plugin with a small custom plugin.
+## Minimum Requirements ##
 
-#### Hook for Site ID
-The plugin defines the hook `global_media.site_id` to set an ID for the network Site, that store the media files, like `add_filter( 'global_media.site_id', 1234 );`.
+**PHP:** 7.0  
+**WordPress:** 4.9  
 
-### Installation
-* Download the plugin as zip, use a clone of the repo or use Composer, see below
-* Install the plugin in your environment, recommend as [Must Use plugin](https://codex.wordpress.org/Must_Use_Plugins), also here a small [hint](https://github.com/bueltge/must-use-loader) for an helping solution [Must Use Loader](https://github.com/bueltge/must-use-loader).
-* Set the side ID for the Global Mediathek, see above the description to change them inside the source or use the hook.
-* Active the plugin for the hole network
+## Installation
 
-#### Composer
-The plugin is also available as [Composer package](https://packagist.org/packages/bueltge/multisite-global-media).
+The plugin is available as a [Composer package](https://packagist.org/packages/johnbillion/network-media-library).
 
-    composer require bueltge/multisite-global-media
+    composer require johnbillion/network-media-library
 
-### Screenshots
+If you don't wish to use Composer, install the plugin as you would normally.
+
+The plugin should be network activated from the Network Admin.
+
+## Screenshots
  ![Media Modal](./assets/screenshot-1.png)
 
  ![Usage in Featured Image](./assets/screenshot-2.png)
- 
-## Other Notes
 
-### Crafted by [Inpsyde](https://inpsyde.com) &middot; Engineering the web since 2006.
+## License
 
-### Bugs, technical hints or contribute
-Please give me feedback, contribute and file technical bugs on this
-[GitHub Repo](https://github.com/bueltge/Multisite-Global-Media/issues), use Issues.
+Good news, this plugin is free for everyone! Since it's released under the MIT, you can use it free of charge on your personal or commercial site.
 
-### License
-Good news, this plugin is free for everyone! Since it's released under the MIT, you can use it free of charge on your personal or commercial blog.
+## History
 
-### Contact & Feedback
-The plugin is designed and developed by team members from the [Inpsyde](https://inpsyde.com/) crew. Special thanks and praise to Dominik Schilling for his quick help.
+This plugin originally started life as a fork of the [Multisite Global Media plugin](https://github.com/bueltge/multisite-global-media) by Frank Bültge and Dominik Schilling, but has since diverged entirely and retains little of the original functionality. If the Network Media Library plugin doesn't suit your needs, try these alternatives:
 
-Please let me know if you like the plugin or you hate it or whatever ...
-
-Please fork it, add an issue for ideas and bugs.
-
-### Disclaimer
-I'm German and my English might be gruesome here and there.
-So please be patient with me and let me know of typos or grammatical parts. Thanks
+* [Multisite Global Media](https://github.com/bueltge/multisite-global-media)
+* [Network Shared Media](https://wordpress.org/plugins/network-shared-media/)
