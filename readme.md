@@ -27,7 +27,7 @@ The plugin is available as a [Composer package](https://packagist.org/packages/j
 
 If you don't wish to use Composer, install the plugin as you would normally.
 
-The plugin should be network activated from the Network Admin.
+The plugin should either be installed as a mu-plugin, or network activated. It cannot be activated on individual sites on the network.
 
 ## Compatibility
 
