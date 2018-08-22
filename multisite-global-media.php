@@ -157,9 +157,9 @@ add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_
  * @param int|null $thumbnail_id Thumbnail attachment ID, or null if there isn't one.
  */
 function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) : string {
-	static $fetching_global_media = false;
+	static $switched = false;
 
-	if ( $fetching_global_media ) {
+	if ( $switched ) {
 		return $content;
 	}
 
@@ -168,10 +168,10 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
 	}
 
 	switch_to_blog( get_site_id() );
-	$fetching_global_media = true;
+	$switched = true;
 	// $thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
-	$content               = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id );
-	$fetching_global_media = false;
+	$content  = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id );
+	$switched = false;
 	restore_current_blog();
 
 	$post             = get_post( $post_id );
