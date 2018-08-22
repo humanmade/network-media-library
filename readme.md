@@ -29,9 +29,19 @@ If you don't wish to use Composer, install the plugin as you would normally.
 
 The plugin should either be installed as a mu-plugin, or network activated. It cannot be activated on individual sites on the network.
 
+## Usage
+
+Use the media library on the sites on your network just as you would normally. All media will be transparently stored on and served from the chosen central media library site.
+
+Currently, users will need to be added to the central media site with sufficient permissions (namely the `upload_files` capability, and the ability to edit attachments). This can be achieved by adding them as an Author level user or higher. Functionality on the Media site will be restricted to only the management of media and nothing else (except for Super Admins).
+
+A future version of this plugin will hopefully remove the need for users to be added to the central media library site.
+
 ## Compatibility
 
-Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading, cropping, inserting, and viewing media. Some functionality, such as editing or deleting attachments, can only be performed from the admin area of the central media library. Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
+Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading files, cropping images, inserting into posts, and viewing attachments. Its functionality works with the site icon, site logo, background and header images, featured images, and regular media.
+
+Some functionality, such as editing or deleting attachments, can only be performed from the admin area of the central media library. Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
 
 Compatibility with third-party plugins is good, but not guaranteed. The following plugins are explicitly supported by Network Media Library:
 
