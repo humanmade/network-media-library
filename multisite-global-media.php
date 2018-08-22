@@ -1,5 +1,5 @@
 <?php # -*- coding: utf-8 -*-
-declare(strict_types=1);
+declare( strict_types=1 );
 
 /**
  * Plugin Name: Multisite Global Media
@@ -37,19 +37,16 @@ defined( 'ABSPATH' ) || die();
  * Alternative change this value with the help
  *  of the filter hook 'global_media.site_id'.
  *
- * @var    integer
- * @since  2015-01-22
+ * @var integer
  */
 const SITE_ID = 2;
 
 /**
  * Return the ID of site that store the media files.
  *
- * @since  2017-12-01
  * @return integer The site ID.
  */
 function get_site_id() : int {
-
 	return (int) apply_filters( 'global_media.site_id', SITE_ID );
 }
 
@@ -67,7 +64,7 @@ function switch_to_media_site() {
  *
  * @return bool Whether we're on the Media site.
  */
-function is_media_site() {
+function is_media_site() : bool {
 	return ( get_site_id() === (int) $GLOBALS['current_blog']->blog_id );
 }
 
