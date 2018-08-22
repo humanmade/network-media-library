@@ -67,6 +67,15 @@ function switch_to_site_id() {
 }
 
 /**
+ * Returns whether or not we're currently on the Media site, regardless of any switching that's occurred.
+ *
+ * @return bool Whether we're on the Media site.
+ */
+function is_media_site() {
+    return ( $GLOBALS['_mgm_current_site_id'] === get_site_id() );
+}
+
+/**
  * Prevents attempts to attach an attachment to a post ID during upload.
  */
 function prevent_attaching() {
@@ -94,7 +103,7 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
  * @return bool[] Concerned user's capabilities.
  */
 function filter_user_has_cap( array $user_caps, array $required_caps, array $args, \WP_User $user ) : array {
-    if ( $GLOBALS['_mgm_current_site_id'] != get_site_id() ) {
+    if ( ! is_media_site() ) {
         return $user_caps;
     }
 
@@ -125,7 +134,7 @@ add_action('admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles');
  */
 function enqueue_styles()
 {
-    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+    if ( is_media_site() ) {
         return;
     }
 
@@ -197,7 +206,7 @@ add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $si
         return $image;
     }
 
-    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+    if ( is_media_site() ) {
         return $image;
     }
 
@@ -222,7 +231,7 @@ add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\prevent_attaching', 0
 
 // Disallow access to the "List" mode on the Media screen.
 add_action( 'load-upload.php', function() {
-    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+    if ( is_media_site() ) {
         return;
     }
 
@@ -256,7 +265,7 @@ add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_
  * @return array Array of prepared attachment data.
  */
 add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, $meta ) : array {
-    if ( $GLOBALS['_mgm_current_site_id'] === get_site_id() ) {
+    if ( is_media_site() ) {
         return $response;
     }
 
