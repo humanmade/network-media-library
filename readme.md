@@ -31,7 +31,7 @@ The plugin should be network activated from the Network Admin.
 
 ## Compatibility
 
-Network Media Library works transparently and seemlessly with all built-in WordPress media functionality, including uploading, cropping, inserting, and viewing media. Some functionality, such as editing or deleting attachments, can only be performed from the admin area of the central media library. Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
+Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading, cropping, inserting, and viewing media. Some functionality, such as editing or deleting attachments, can only be performed from the admin area of the central media library. Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
 
 Compatibility with third-party plugins is good, but not guaranteed. The following plugins are explicitly supported by Network Media Library:
 
