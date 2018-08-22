@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<ruleset name="MultisiteGlobalMedia">
+<ruleset name="Network_Media_Library">
 
 	<config name="installed_paths" value="../../wp-coding-standards/wpcs,../../phpcompatibility/php-compatibility,../../automattic/phpcs-neutron-standard" />
 	<config name="testVersion" value="7.0-"/>
