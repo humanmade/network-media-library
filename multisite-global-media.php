@@ -41,13 +41,6 @@ defined('ABSPATH') || die();
 const SITE_ID = 2;
 
 /**
- * ID of the actual current site ID, used while switching between sites.
- *
- * @var integer
- */
-$GLOBALS['_mgm_current_site_id'] = get_current_blog_id();
-
-/**
  * Return the ID of site that store the media files.
  *
  * @since  2017-12-01
@@ -69,10 +62,12 @@ function switch_to_site_id() {
 /**
  * Returns whether or not we're currently on the Media site, regardless of any switching that's occurred.
  *
+ * `$current_blog` can be used to determine the "actual" site as it doesn't change when switching sites.
+ *
  * @return bool Whether we're on the Media site.
  */
 function is_media_site() {
-    return ( $GLOBALS['_mgm_current_site_id'] === get_site_id() );
+    return ( (int) $GLOBALS['current_blog']->blog_id === get_site_id() );
 }
 
 /**
