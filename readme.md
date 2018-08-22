@@ -30,9 +30,8 @@ If you don't wish to use Composer, install the plugin as you would normally.
 The plugin should be network activated from the Network Admin.
 
 ## Screenshots
- ![Media Modal](./assets/screenshot-1.png)
 
- ![Usage in Featured Image](./assets/screenshot-2.png)
+There are no screenshots to show as Network Media Library operates transparently and introduces no new UI. Simply upload, manage, insert, and use your media as you would normally, and everything will operate through the central media library.
 
 ## License
 
