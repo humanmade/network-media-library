@@ -48,12 +48,34 @@ defined( 'ABSPATH' ) || die();
 const SITE_ID = 2;
 
 /**
- * Returns the ID of site which acts as the network media library.
+ * Returns the ID of the site which acts as the network media library.
  *
  * @return int The network media library site ID.
  */
 function get_site_id() : int {
-	return (int) apply_filters( 'network-media-library/site_id', SITE_ID );
+	$site_id = SITE_ID;
+
+	/**
+	 * Filters the ID of the site which acts as the network media library.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $site_id The network media library site ID.
+	 */
+	$site_id = (int) apply_filters( 'network-media-library/site_id', $site_id );
+
+	/**
+	 * Legacy filter which filters the ID of the site which acts as the network media library.
+	 *
+	 * This is provided for compatibility with the Multisite Global Media plugin.
+	 *
+	 * @since 0.0.3
+	 *
+	 * @param int $site_id The network media library site ID.
+	 */
+	$site_id = (int) apply_filters_deprecated( 'global_media.site_id', [ $site_id ], '1.0.0', 'network-media-library/site_id' );
+
+	return $site_id;
 }
 
 /**
