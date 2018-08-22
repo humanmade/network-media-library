@@ -244,6 +244,9 @@ add_action( 'wp_ajax_crop-image', __NAMESPACE__ . '\switch_to_site_id', 0 );
 add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_site_id', 0 );
 add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_site_id', 0 );
 
+// Support for the WP User Avatars plugin.
+add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_site_id', 0 );
+
 /**
  * Filters the attachment data prepared for JavaScript.
  *
