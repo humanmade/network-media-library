@@ -8,7 +8,8 @@
   "authors": [
     {
       "name": "John Blackbourn",
-      "homepage": "https://johnblackbourn.com/"
+      "homepage": "https://johnblackbourn.com/",
+      "role": "Developer"
     },
     {
       "name": "Dominik Schilling",
