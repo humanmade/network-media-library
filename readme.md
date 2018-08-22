@@ -39,7 +39,7 @@ A future version of this plugin will hopefully remove the need for users to be a
 
 ## Compatibility
 
-Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading files, cropping images, inserting into posts, and viewing attachments. Its functionality works with the site icon, site logo, background and header images, featured images, and regular media.
+Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading files, cropping images, inserting into posts, and viewing attachments. Its functionality works with the site icon, site logo, background and header images, featured images, galleries, the audio and image widgets, and regular media management.
 
 Some functionality, such as editing or deleting attachments, can only be performed from the admin area of the central media library. Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
 

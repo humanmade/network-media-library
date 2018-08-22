@@ -237,6 +237,27 @@ add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $si
 	return $image;
 }, 999, 4 );
 
+/**
+ * Filters the default gallery shortcode output so it shows media from the network media library site.
+ *
+ * @param string $output   The gallery output.
+ * @param array  $attr     Attributes of the gallery shortcode.
+ * @param int    $instance Unique numeric ID of this gallery shortcode instance.
+ * @return string The gallery output.
+ */
+function filter_post_gallery( string $output, array $attr, int $instance ) : string {
+	remove_filter( 'post_gallery', __NAMESPACE__ . '\filter_post_gallery', 0 );
+
+	switch_to_media_site();
+	$output = gallery_shortcode( $attr );
+	restore_current_blog();
+
+	add_filter( 'post_gallery', __NAMESPACE__ . '\filter_post_gallery', 0, 3 );
+
+	return $output;
+}
+add_filter( 'post_gallery', __NAMESPACE__ . '\filter_post_gallery', 0, 3 );
+
 // Allow users to upload attachments.
 add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_media_site', 0 );
 add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
