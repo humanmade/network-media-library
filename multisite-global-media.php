@@ -55,7 +55,7 @@ function get_site_id() : int
 /**
  * Switches the current site ID to the global media library site ID.
  */
-function switch_to_site_id() {
+function switch_to_media_site() {
     switch_to_blog( get_site_id() );
 }
 
@@ -205,7 +205,7 @@ add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $si
         return $image;
     }
 
-    switch_to_site_id();
+    switch_to_media_site();
 
     $switched = true;
     $image    = wp_get_attachment_image_src( $attachment_id, $size, $icon );
@@ -217,8 +217,8 @@ add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $si
 }, 999, 4 );
 
 // Allow users to upload attachments.
-add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_site_id', 0 );
-add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
 // Allow attachments to be uploaded without a corresponding post on the media site.
 add_action( 'load-async-upload.php', __NAMESPACE__ . '\prevent_attaching', 0 );
@@ -234,22 +234,22 @@ add_action( 'load-upload.php', function() {
 }, 0 );
 
 // Allow attachment details to be fetched and saved.
-add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
-add_action( 'wp_ajax_save-attachment', __NAMESPACE__ . '\switch_to_site_id', 0 );
-add_action( 'wp_ajax_save-attachment-compat', __NAMESPACE__ . '\switch_to_site_id', 0 );
-add_action( 'wp_ajax_set-attachment-thumbnail', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_save-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_save-attachment-compat', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_set-attachment-thumbnail', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
 // Allow images to be edited and previewed.
-add_action( 'wp_ajax_image-editor', __NAMESPACE__ . '\switch_to_site_id', 0 );
-add_action( 'wp_ajax_imgedit-preview', __NAMESPACE__ . '\switch_to_site_id', 0 );
-add_action( 'wp_ajax_crop-image', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_image-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_imgedit-preview', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_crop-image', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
 // Allow attachments to be queried and inserted.
-add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_site_id', 0 );
-add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
 // Support for the WP User Avatars plugin.
-add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_site_id', 0 );
+add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
 /**
  * Filters the attachment data prepared for JavaScript.
@@ -288,7 +288,7 @@ add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP
     foreach ( $media_routes as $route ) {
         if ( 0 === strpos( $request->get_route(), $route ) ) {
             $request->set_param( 'post', null );
-            switch_to_site_id();
+            switch_to_media_site();
             break;
         }
     }
@@ -310,7 +310,7 @@ add_action( 'xmlrpc_call', function( string $name ) {
     ];
 
     if ( in_array( $name, $media_methods, true ) ) {
-        switch_to_site_id();
+        switch_to_media_site();
     }
 }, 0 );
 
