@@ -29,6 +29,25 @@ If you don't wish to use Composer, install the plugin as you would normally.
 
 The plugin should be network activated from the Network Admin.
 
+## Compatibility
+
+Network Media Library works transparently and seemlessly with all built-in WordPress media functionality, including uploading, cropping, inserting, and viewing media. Some functionality, such as editing or deleting attachments, can only be performed from the admin area of the central media library. Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
+
+Compatibility with third-party plugins is good, but not guaranteed. The following plugins are explicitly supported by Network Media Library:
+
+* [Regenerate Thumbnails](https://wordpress.org/plugins/regenerate-thumbnails/)
+* [WP User Avatars](https://wordpress.org/plugins/wp-user-avatars/)
+
+The following plugins and libraries have been tested and confirmed as compatible out of the box:
+
+* [BuddyPress](https://wordpress.org/plugins/buddypress/)
+* [Extended CPTs](https://github.com/johnbillion/extended-cpts)
+* [Gutenberg](https://wordpress.org/plugins/gutenberg/)
+* [Stream](https://wordpress.org/plugins/stream/)
+* [User Profile Picture](https://wordpress.org/plugins/metronet-profile-picture/)
+
+I plan to fully test (and add support if necessary) many other plugins and libraries, including CMB2, ACF, and many gallery and media management plugins. Stay tuned for updates!
+
 ## Screenshots
 
 There are no screenshots to show as Network Media Library operates transparently and introduces no new UI. Simply upload, manage, insert, and use your media as you would normally, and everything will operate through the central media library.
