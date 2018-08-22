@@ -4,6 +4,13 @@ declare( strict_types=1 );
 /**
  * Network Media Library plugin for WordPress
  *
+ * This plugin originally started life as a fork of the Multisite Global Media plugin by Frank Bültge and Dominik
+ * Schilling, but has since diverged entirely and retains little of the original functionality. If the Network Media
+ * Library plugin doesn't suit your needs, try these alternatives:
+ *
+ * - [Multisite Global Media](https://github.com/bueltge/multisite-global-media)
+ * - [Network Shared Media](https://wordpress.org/plugins/network-shared-media/)
+ *
  * @package   network-media-library
  * @link      https://github.com/johnbillion/network-media-library
  * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
@@ -33,38 +40,35 @@ use WP_Post, WP_User;
 defined( 'ABSPATH' ) || die();
 
 /**
- * Id of side inside the network, there store the global media.
- * Select the ID of the site/blog to where you want media
- *  that will be shared across the network to be stored.
- * Alternative change this value with the help
- *  of the filter hook 'network-media-library.site_id'.
+ * The ID of the site on the network which acts as the network media library. Change this value with the help
+ * of the filter hook `network-media-library/site_id`.
  *
- * @var integer
+ * @var int The network media library site ID.
  */
 const SITE_ID = 2;
 
 /**
- * Return the ID of site that store the media files.
+ * Returns the ID of site which acts as the network media library.
  *
- * @return integer The site ID.
+ * @return int The network media library site ID.
  */
 function get_site_id() : int {
 	return (int) apply_filters( 'network-media-library/site_id', SITE_ID );
 }
 
 /**
- * Switches the current site ID to the global media library site ID.
+ * Switches the current site ID to the network media library site ID.
  */
 function switch_to_media_site() {
 	switch_to_blog( get_site_id() );
 }
 
 /**
- * Returns whether or not we're currently on the Media site, regardless of any switching that's occurred.
+ * Returns whether or not we're currently on the network media library site, regardless of any switching that's occurred.
  *
  * `$current_blog` can be used to determine the "actual" site as it doesn't change when switching sites.
  *
- * @return bool Whether we're on the Media site.
+ * @return bool Whether we're on the network media library site.
  */
 function is_media_site() : bool {
 	return ( get_site_id() === (int) $GLOBALS['current_blog']->blog_id );
@@ -81,7 +85,7 @@ add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
 /**
  * Filters a user's capabilities so they can be altered at runtime.
  *
- * This is used to prevent access to anything on the Media site except for managing media.
+ * This is used to prevent access to anything on the network media library site except for managing media.
  *
  * Important: This does not get called for Super Admins.
  *
@@ -123,9 +127,7 @@ function filter_user_has_cap( array $user_caps, array $required_caps, array $arg
 
 add_action( 'admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles' );
 /**
- * Enqueue script for media modal
- *
- * @since   2015-02-27
+ * Outputs some styles on the Media screen when we're not on the network media library site.
  */
 function enqueue_styles() {
 	if ( is_media_site() ) {
@@ -183,7 +185,7 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
 }
 
 /**
- * Filters the image src result so its URL points to the media site.
+ * Filters the image src result so its URL points to the network media library site.
  *
  * @param array|false  $image         Either array with src, width & height, icon src, or false.
  * @param int          $attachment_id Image attachment ID.
@@ -217,7 +219,7 @@ add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $si
 add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_media_site', 0 );
 add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
-// Allow attachments to be uploaded without a corresponding post on the media site.
+// Allow attachments to be uploaded without a corresponding post on the network media library site.
 add_action( 'load-async-upload.php', __NAMESPACE__ . '\prevent_attaching', 0 );
 add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\prevent_attaching', 0 );
 
@@ -261,7 +263,7 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
 		return $response;
 	}
 
-	// Prevent media from being deleted from any site other than the global media site.
+	// Prevent media from being deleted from any site other than the network media library site.
 	// This is needed in order to prevent incorrect posts from being deleted on the local site.
 	unset( $response['nonces']['delete'] );
 
@@ -269,7 +271,7 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
 }, 0, 3 );
 
 /**
- * Filters the pre-calculated result of a REST dispatch request.
+ * Filters the pre-dispatch value of REST API requests in order to switch to the network media library site when querying media.
  *
  * @param mixed           $result  Response to replace the requested version with. Can be anything
  *                                 a normal endpoint can return, or null to not hijack the request.
@@ -294,8 +296,8 @@ add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP
 }, 0, 3 );
 
 /**
- * Fires after the XML-RPC user has been authenticated, but before the rest of the
- * method logic begins, in order to switch to the media site when querying media.
+ * Fires after the XML-RPC user has been authenticated, but before the rest of the method logic begins, in order to
+ * switch to the network media library site when querying media.
  *
  * @param string $name The method name.
  */
