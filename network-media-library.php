@@ -21,7 +21,7 @@ declare( strict_types=1 );
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/johnbillion/network-media-library
- * Version:     0.0.5
+ * Version:     1.0.0
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
  * License:     MIT
  * License URI: ./LICENSE
