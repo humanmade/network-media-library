@@ -68,7 +68,15 @@ Good news, this plugin is free for everyone! Since it's released under the MIT, 
 
 ## History
 
-This plugin originally started life as a fork of the [Multisite Global Media plugin](https://github.com/bueltge/multisite-global-media) by Frank Bültge and Dominik Schilling, but has since diverged entirely and retains little of the original functionality. If the Network Media Library plugin doesn't suit your needs, try these alternatives:
+This plugin originally started life as a fork of the [Multisite Global Media plugin](https://github.com/bueltge/multisite-global-media) by Frank Bültge and Dominik Schilling at [Inpsyde](https://inpsyde.com/), but has since diverged entirely and retains little of the original functionality.
+
+The initial fork of this plugin was made as part of a client project at [Human Made](https://humanmade.com/). We build and manage high-performance WordPress websites for some of the largest publishers in the world.
+
+Hurrah for open source!
+
+## Alternatives
+
+If the Network Media Library plugin doesn't suit your needs, try these alternatives:
 
 * [Multisite Global Media](https://github.com/bueltge/multisite-global-media)
 * [Network Shared Media](https://wordpress.org/plugins/network-shared-media/)
