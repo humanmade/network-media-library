@@ -23,6 +23,7 @@ declare( strict_types=1 );
  * Plugin URI:  https://github.com/johnbillion/network-media-library
  * Version:     1.1.0
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
+ * Author URI:  https://github.com/johnbillion/network-media-library/graphs/contributors
  * License:     MIT
  * License URI: ./LICENSE
  * Text Domain: network-media-library

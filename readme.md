@@ -4,7 +4,7 @@ Network Media Library is a plugin for WordPress Multisite which provides a centr
 
 ## Description
 
-This small plugin transparently shares media from one central media library site to all the other sites on the network. All media that's uploaded gets transparently directed to the central media site, and subsequently made available network-wide.
+This small plugin transparently shares media from one central media library site to all the other sites on the network. All media that's uploaded gets transparently directed to the central media site, and subsequently made available network-wide. Nothing is copied, cloned, synchronised, or mirrored, so for each file that's uploaded there's only one attachment and one copy of the file.
 
 Site ID `2` is used by default as the central media library. You can configure the media library site ID via the filter hook `network-media-library/site_id`:
 
@@ -27,21 +27,25 @@ The plugin is available as a [Composer package](https://packagist.org/packages/j
 
 If you don't wish to use Composer, install the plugin as you would normally.
 
-The plugin should either be installed as a mu-plugin, or network activated. It cannot be activated on individual sites on the network.
+The plugin should either be installed as a mu-plugin or network activated. It cannot be activated on individual sites on the network.
 
 ## Usage
 
 Use the media library on the sites on your network just as you would normally. All media will be transparently stored on and served from the chosen central media library site.
 
-Currently, users will need to be added to the central media site with sufficient permissions (namely the `upload_files` capability, and the ability to edit attachments). This can be achieved by adding them as an Author level user or higher. Functionality on the Media site will be restricted to only the management of media and nothing else (except for Super Admins).
+Currently, users need to be added to the central media site with the `upload_files` capability and the ability to edit attachments. This can be achieved by adding them as an Author level user or higher. A future version of this plugin will hopefully remove the need for users to be added to the central media library site.
 
-A future version of this plugin will hopefully remove the need for users to be added to the central media library site.
+Functionality on the central media site is restricted to only the management of media, except for Super Admins.
+
+Attachments can be deleted only from within the admin area of the central media library.
 
 ## Compatibility
 
-Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading files, cropping images, inserting into posts, and viewing attachments. Its functionality works with the site icon, site logo, background and header images, featured images, galleries, the audio and image widgets, and regular media management.
+Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading files, cropping images, inserting media into posts, and viewing attachments. Its functionality works with the site icon, site logo, background and header images, featured images, galleries, the audio and image widgets, and regular media management.
 
-Some functionality, such as editing or deleting attachments, can only be performed from the admin area of the central media library. Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
+The plugin works with the REST API, XML-RPC, and all standard Ajax endpoints for media management.
+
+Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
 
 Compatibility with third-party plugins is good, but not guaranteed. The following plugins are explicitly supported by Network Media Library:
 
