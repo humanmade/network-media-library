@@ -290,7 +290,7 @@ add_action( 'wp_ajax_crop-image', __NAMESPACE__ . '\switch_to_media_site', 0 );
 // Allow attachments to be queried and inserted.
 add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_media_site', 0 );
 add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
-add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 2 );
+add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
 
 // Support for the WP User Avatars plugin.
 add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_media_site', 0 );
@@ -366,10 +366,12 @@ add_action( 'xmlrpc_call', function( string $name ) {
  *
  * @param string[] $caps Capabilities for meta capability.
  * @param string   $cap  Capability name.
+ * @param int      $user_id The user ID.
+ * @param array    $args    Adds the context to the cap. Typically the object ID.
  *
  * @return string[] Updated capabilities.
  */
-function allow_media_library_access( array $caps, string $cap ) : array {
+function allow_media_library_access( array $caps, string $cap, int $user_id, array $args ) : array {
 	if ( $cap !== 'upload_files' || get_current_blog_id() !== get_site_id() ) {
 		return $caps;
 	}
@@ -381,8 +383,8 @@ function allow_media_library_access( array $caps, string $cap ) : array {
 	switch_to_blog( (int) $GLOBALS['current_blog']->blog_id );
 
 	remove_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10 );
-	$user_can_upload = current_user_can( 'upload_files' );
-	add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 2 );
+	$user_can_upload = user_can( $user_id, 'upload_files' );
+	add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
 
 	restore_current_blog();
 
