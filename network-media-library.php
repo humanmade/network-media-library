@@ -364,15 +364,15 @@ add_action( 'xmlrpc_call', function( string $name ) {
  * This grants a user access to the network media site's library, if that user has access to
  * the media library of the current site (whichever site the request has been made from).
  *
- * @param string[] $caps Capabilities for meta capability.
- * @param string   $cap  Capability name.
+ * @param string[] $caps    Capabilities for meta capability.
+ * @param string   $cap     Capability name.
  * @param int      $user_id The user ID.
  * @param array    $args    Adds the context to the cap. Typically the object ID.
  *
  * @return string[] Updated capabilities.
  */
 function allow_media_library_access( array $caps, string $cap, int $user_id, array $args ) : array {
-	if ( $cap !== 'upload_files' || get_current_blog_id() !== get_site_id() ) {
+	if ( 'upload_files' !== $cap || get_current_blog_id() !== get_site_id() ) {
 		return $caps;
 	}
 
@@ -388,9 +388,8 @@ function allow_media_library_access( array $caps, string $cap, int $user_id, arr
 
 	restore_current_blog();
 
-	return ( $user_can_upload ? array( 'exist' ) : $caps );
+	return ( $user_can_upload ? [ 'exist' ] : $caps );
 }
-
 
 /**
  * A class which handles saving the post's featured image ID.
