@@ -5,6 +5,10 @@
 	<config name="testVersion" value="7.0-"/>
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+
+	<!-- Include the PHP version compatibility standard. -->
+	<rule ref="PHPCompatibility"/>
 
 	<rule ref="WordPress-Extra">
 		<exclude name="WordPress.Files.FileName" />
