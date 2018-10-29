@@ -21,9 +21,9 @@ add_filter( 'network-media-library/site_id', function( $site_id ) {
 
 ## Installation
 
-The plugin is available as a [Composer package](https://packagist.org/packages/johnbillion/network-media-library).
+The plugin is available as a [Composer package](https://packagist.org/packages/humanmade/network-media-library).
 
-    composer require johnbillion/network-media-library
+    composer require humanmade/network-media-library
 
 If you don't wish to use Composer, install the plugin as you would normally.
 

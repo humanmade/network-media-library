@@ -1,9 +1,9 @@
 {
-  "name": "johnbillion/network-media-library",
+  "name": "humanmade/network-media-library",
   "type": "wordpress-muplugin",
   "description": "Network Media Library provides a central media library that's shared across all sites on the Multisite network.",
   "keywords": ["wordpress", "plugin", "multisite"],
-  "homepage": "https://github.com/johnbillion/network-media-library",
+  "homepage": "https://github.com/humanmade/network-media-library",
   "license": "MIT",
   "authors": [
     {

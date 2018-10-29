@@ -12,7 +12,7 @@ declare( strict_types=1 );
  * - [Network Shared Media](https://wordpress.org/plugins/network-shared-media/)
  *
  * @package   network-media-library
- * @link      https://github.com/johnbillion/network-media-library
+ * @link      https://github.com/humanmade/network-media-library
  * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
  * @copyright 2018 John Blackbourn
  * @license   https://opensource.org/licenses/MIT
@@ -20,10 +20,10 @@ declare( strict_types=1 );
  * Plugin Name: Network Media Library
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
- * Plugin URI:  https://github.com/johnbillion/network-media-library
- * Version:     1.2.0
+ * Plugin URI:  https://github.com/humanmade/network-media-library
+ * Version:     1.3.0
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
- * Author URI:  https://github.com/johnbillion/network-media-library/graphs/contributors
+ * Author URI:  https://github.com/humanmade/network-media-library/graphs/contributors
  * License:     MIT
  * License URI: ./LICENSE
  * Text Domain: network-media-library
