@@ -372,23 +372,37 @@ add_action( 'xmlrpc_call', function( string $name ) {
  * @return string[] Updated capabilities.
  */
 function allow_media_library_access( array $caps, string $cap, int $user_id, array $args ) : array {
-	if ( 'upload_files' !== $cap || get_current_blog_id() !== get_site_id() ) {
+	if ( get_current_blog_id() !== get_site_id() ) {
 		return $caps;
+	}
+
+	if ( ! in_array( $cap, [ 'edit_post', 'upload_files' ], true ) ) {
+		return $caps;
+	}
+
+	if ( 'edit_post' === $cap ) {
+		$content = get_post( $args[0] );
+		if ( 'attachment' !== $content->post_type ) {
+			return $caps;
+		}
+
+		// Substitute edit_post because the attachment exists only on the network media site.
+		$cap = get_post_type_object( $content->post_type )->cap->create_posts;
 	}
 
 	/*
 	 * By the time this function is called, we've already switched context to the network media site.
-	 * Switch back to the site the initial request came in from.
+	 * Switch back to the original site -- where the initial request came in from.
 	 */
 	switch_to_blog( (int) $GLOBALS['current_blog']->blog_id );
-
 	remove_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10 );
-	$user_can_upload = user_can( $user_id, 'upload_files' );
-	add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
 
+	$user_has_permission = user_can( $user_id, $cap );
+
+	add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
 	restore_current_blog();
 
-	return ( $user_can_upload ? [ 'exist' ] : $caps );
+	return ( $user_has_permission ? [ 'exist' ] : $caps );
 }
 
 /**
