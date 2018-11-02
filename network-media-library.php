@@ -12,7 +12,7 @@ declare( strict_types=1 );
  * - [Network Shared Media](https://wordpress.org/plugins/network-shared-media/)
  *
  * @package   network-media-library
- * @link      https://github.com/johnbillion/network-media-library
+ * @link      https://github.com/humanmade/network-media-library
  * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
  * @copyright 2018 John Blackbourn
  * @license   https://opensource.org/licenses/MIT
@@ -20,9 +20,10 @@ declare( strict_types=1 );
  * Plugin Name: Network Media Library
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
- * Plugin URI:  https://github.com/johnbillion/network-media-library
- * Version:     1.1.0
+ * Plugin URI:  https://github.com/humanmade/network-media-library
+ * Version:     1.3.0
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
+ * Author URI:  https://github.com/humanmade/network-media-library/graphs/contributors
  * License:     MIT
  * License URI: ./LICENSE
  * Text Domain: network-media-library
@@ -38,6 +39,13 @@ use WP_Post, WP_User;
  * Don't call this file directly.
  */
 defined( 'ABSPATH' ) || die();
+
+/**
+ * Don't run if multisite not enabled
+ */
+if ( ! is_multisite() ) {
+    return;
+}
 
 /**
  * The ID of the site on the network which acts as the network media library. Change this value with the help
@@ -102,9 +110,8 @@ function is_media_site() : bool {
 function prevent_attaching() {
 	unset( $_REQUEST['post_id'] );
 }
-if( is_multisite() ) {
-	add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
-}
+
+add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
 /**
  * Filters a user's capabilities so they can be altered at runtime.
  *
@@ -147,9 +154,8 @@ function filter_user_has_cap( array $user_caps, array $required_caps, array $arg
 
 	return [];
 }
-if( is_multisite() ) {
-	add_action( 'admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles' );
-}
+
+add_action( 'admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles' );
 /**
  * Outputs some styles on the Media screen when we're not on the network media library site.
  */
@@ -172,10 +178,7 @@ function enqueue_styles() {
 	<?php
 }
 
-if( is_multisite() ) {
-	add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3 );
-}
-
+add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3 );
 /**
  * Filters the admin post thumbnail HTML markup to return.
  *
@@ -220,30 +223,28 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
  * @param bool         $icon          Whether the image should be treated as an icon.
  * @return array|false Either array with src, width & height, icon src, or false.
  */
+add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $size, bool $icon ) {
+	static $switched = false;
 
-if( is_multisite() ) {
-	add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $size, bool $icon ) {
-		static $switched = false;
-
-		if ( $switched ) {
-			return $image;
-		}
-
-		if ( is_media_site() ) {
-			return $image;
-		}
-
-		switch_to_media_site();
-
-		$switched = true;
-		$image    = wp_get_attachment_image_src( $attachment_id, $size, $icon );
-		$switched = false;
-
-		restore_current_blog();
-
+	if ( $switched ) {
 		return $image;
-	}, 999, 4 );
-}
+	}
+
+	if ( is_media_site() ) {
+		return $image;
+	}
+
+	switch_to_media_site();
+
+	$switched = true;
+	$image    = wp_get_attachment_image_src( $attachment_id, $size, $icon );
+	$switched = false;
+
+	restore_current_blog();
+
+	return $image;
+}, 999, 4 );
+
 /**
  * Filters the default gallery shortcode output so it shows media from the network media library site.
  *
@@ -263,44 +264,44 @@ function filter_post_gallery( string $output, array $attr, int $instance ) : str
 
 	return $output;
 }
-if( is_multisite() ) {
-	add_filter( 'post_gallery', __NAMESPACE__ . '\filter_post_gallery', 0, 3 );
+add_filter( 'post_gallery', __NAMESPACE__ . '\filter_post_gallery', 0, 3 );
 
-	// Allow users to upload attachments.
-	add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_media_site', 0 );
-	add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
+// Allow users to upload attachments.
+add_action( 'load-async-upload.php', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
-	// Allow attachments to be uploaded without a corresponding post on the network media library site.
-	add_action( 'load-async-upload.php', __NAMESPACE__ . '\prevent_attaching', 0 );
-	add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\prevent_attaching', 0 );
+// Allow attachments to be uploaded without a corresponding post on the network media library site.
+add_action( 'load-async-upload.php', __NAMESPACE__ . '\prevent_attaching', 0 );
+add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\prevent_attaching', 0 );
 
-	// Disallow access to the "List" mode on the Media screen.
-	add_action( 'load-upload.php', function() {
-		if ( is_media_site() ) {
-			return;
-		}
+// Disallow access to the "List" mode on the Media screen.
+add_action( 'load-upload.php', function() {
+	if ( is_media_site() ) {
+		return;
+	}
 
-		$_GET['mode'] = 'grid';
-	}, 0 );
+	$_GET['mode'] = 'grid';
+}, 0 );
 
-	// Allow attachment details to be fetched and saved.
-	add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
-	add_action( 'wp_ajax_save-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
-	add_action( 'wp_ajax_save-attachment-compat', __NAMESPACE__ . '\switch_to_media_site', 0 );
-	add_action( 'wp_ajax_set-attachment-thumbnail', __NAMESPACE__ . '\switch_to_media_site', 0 );
+// Allow attachment details to be fetched and saved.
+add_action( 'wp_ajax_get-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_save-attachment', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_save-attachment-compat', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_set-attachment-thumbnail', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
-	// Allow images to be edited and previewed.
-	add_action( 'wp_ajax_image-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
-	add_action( 'wp_ajax_imgedit-preview', __NAMESPACE__ . '\switch_to_media_site', 0 );
-	add_action( 'wp_ajax_crop-image', __NAMESPACE__ . '\switch_to_media_site', 0 );
+// Allow images to be edited and previewed.
+add_action( 'wp_ajax_image-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_imgedit-preview', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_crop-image', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
-	// Allow attachments to be queried and inserted.
-	add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_media_site', 0 );
-	add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
+// Allow attachments to be queried and inserted.
+add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
+add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
 
-	// Support for the WP User Avatars plugin.
-	add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_media_site', 0 );
-}
+// Support for the WP User Avatars plugin.
+add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_media_site', 0 );
+
 /**
  * Filters the attachment data prepared for JavaScript.
  *
@@ -329,25 +330,22 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
  * @param WP_REST_Server  $this    Server instance.
  * @param WP_REST_Request $request Request used to generate the response.
  */
+add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
+	$media_routes = [
+		'/wp/v2/media',
+		'/regenerate-thumbnails/',
+	];
 
-if( is_multisite() ) {
-	add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
-		$media_routes = [
-			'/wp/v2/media',
-			'/regenerate-thumbnails/',
-		];
-
-		foreach ( $media_routes as $route ) {
-			if ( 0 === strpos( $request->get_route(), $route ) ) {
-				$request->set_param( 'post', null );
-				switch_to_media_site();
-				break;
-			}
+	foreach ( $media_routes as $route ) {
+		if ( 0 === strpos( $request->get_route(), $route ) ) {
+			$request->set_param( 'post', null );
+			switch_to_media_site();
+			break;
 		}
+	}
 
-		return $result;
-	}, 0, 3 );
-}
+	return $result;
+}, 0, 3 );
 
 /**
  * Fires after the XML-RPC user has been authenticated, but before the rest of the method logic begins, in order to
@@ -355,19 +353,51 @@ if( is_multisite() ) {
  *
  * @param string $name The method name.
  */
-if( is_multisite() ) {
-	add_action( 'xmlrpc_call', function( string $name ) {
-		$media_methods = [
-			'metaWeblog.newMediaObject',
-			'wp.getMediaItem',
-			'wp.getMediaLibrary',
-		];
+add_action( 'xmlrpc_call', function( string $name ) {
+	$media_methods = [
+		'metaWeblog.newMediaObject',
+		'wp.getMediaItem',
+		'wp.getMediaLibrary',
+	];
 
-		if ( in_array( $name, $media_methods, true ) ) {
-			switch_to_media_site();
-		}
-	}, 0 );
+	if ( in_array( $name, $media_methods, true ) ) {
+		switch_to_media_site();
+	}
+}, 0 );
+
+/**
+ * Apply the current site's `upload_files` capability to the network media site.
+ *
+ * This grants a user access to the network media site's library, if that user has access to
+ * the media library of the current site (whichever site the request has been made from).
+ *
+ * @param string[] $caps    Capabilities for meta capability.
+ * @param string   $cap     Capability name.
+ * @param int      $user_id The user ID.
+ * @param array    $args    Adds the context to the cap. Typically the object ID.
+ *
+ * @return string[] Updated capabilities.
+ */
+function allow_media_library_access( array $caps, string $cap, int $user_id, array $args ) : array {
+	if ( 'upload_files' !== $cap || get_current_blog_id() !== get_site_id() ) {
+		return $caps;
+	}
+
+	/*
+	 * By the time this function is called, we've already switched context to the network media site.
+	 * Switch back to the site the initial request came in from.
+	 */
+	switch_to_blog( (int) $GLOBALS['current_blog']->blog_id );
+
+	remove_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10 );
+	$user_can_upload = user_can( $user_id, 'upload_files' );
+	add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
+
+	restore_current_blog();
+
+	return ( $user_can_upload ? [ 'exist' ] : $caps );
 }
+
 /**
  * A class which handles saving the post's featured image ID.
  *
@@ -424,6 +454,5 @@ class Post_Thumbnail_Saver {
 	}
 
 }
-if( is_multisite() ) {
-	new Post_Thumbnail_Saver();
-}
+
+new Post_Thumbnail_Saver();
