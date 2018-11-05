@@ -33,8 +33,6 @@ The plugin should either be installed as a mu-plugin or network activated. It ca
 
 Use the media library on the sites on your network just as you would normally. All media will be transparently stored on and served from the chosen central media library site.
 
-Currently, users need to be added to the central media site with the `upload_files` capability and the ability to edit attachments. This can be achieved by adding them as an Author level user or higher. A future version of this plugin will hopefully remove the need for users to be added to the central media library site.
-
 Functionality on the central media site is restricted to only the management of media, except for Super Admins.
 
 Attachments can be deleted only from within the admin area of the central media library.
