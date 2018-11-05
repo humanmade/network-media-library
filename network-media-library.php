@@ -21,7 +21,7 @@ declare( strict_types=1 );
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/humanmade/network-media-library
- * Version:     1.3.0
+ * Version:     1.3.1
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
  * Author URI:  https://github.com/humanmade/network-media-library/graphs/contributors
  * License:     MIT
