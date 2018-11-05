@@ -41,6 +41,13 @@ use WP_Post, WP_User;
 defined( 'ABSPATH' ) || die();
 
 /**
+ * Don't run if multisite not enabled
+ */
+if ( ! is_multisite() ) {
+    return;
+}
+
+/**
  * The ID of the site on the network which acts as the network media library. Change this value with the help
  * of the filter hook `network-media-library/site_id`.
  *
