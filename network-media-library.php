@@ -44,7 +44,7 @@ defined( 'ABSPATH' ) || die();
  * Don't run if multisite not enabled
  */
 if ( ! is_multisite() ) {
-    return;
+	return;
 }
 
 /**
