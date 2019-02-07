@@ -111,50 +111,6 @@ function prevent_attaching() {
 	unset( $_REQUEST['post_id'] );
 }
 
-add_filter( 'user_has_cap', __NAMESPACE__ . '\filter_user_has_cap', 10, 4 );
-/**
- * Filters a user's capabilities so they can be altered at runtime.
- *
- * This is used to prevent access to anything on the network media library site except for managing media.
- *
- * Important: This does not get called for Super Admins.
- *
- * @param bool[]   $user_caps     Concerned user's capabilities.
- * @param string[] $required_caps Required primitive capabilities for the requested capability.
- * @param array    $args {
- *     Arguments that accompany the requested capability check.
- *
- *     @type string    $0 Requested capability.
- *     @type int       $1 Concerned user ID.
- *     @type mixed  ...$2 Optional second and further parameters.
- * }
- * @param WP_User  $user          Concerned user object.
- * @return bool[] Concerned user's capabilities.
- */
-function filter_user_has_cap( array $user_caps, array $required_caps, array $args, WP_User $user ) : array {
-	if ( ! is_media_site() ) {
-		return $user_caps;
-	}
-
-	$allowed_on_media_site = [
-		'read',
-		'upload_files',
-	];
-
-	if ( in_array( $args[0], $allowed_on_media_site, true ) ) {
-		return $user_caps;
-	}
-
-	if ( 'edit_post' === $args[0] ) {
-		$post = get_post( $args[2] );
-		if ( $post && 'attachment' === $post->post_type ) {
-			return $user_caps;
-		}
-	}
-
-	return [];
-}
-
 add_action( 'admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles' );
 /**
  * Outputs some styles on the Media screen when we're not on the network media library site.
