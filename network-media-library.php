@@ -160,11 +160,18 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
 	$switched = false;
 	restore_current_blog();
 
-	$post             = get_post( $post_id );
-	$post_type_object = get_post_type_object( $post->post_type );
+	$post              = get_post( $post_id );
+	$post_type_object  = get_post_type_object( $post->post_type );
+	$has_thumbnail_url = get_the_post_thumbnail_url( $post_id ) !== false;
 
-	$search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
-	$replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
+	if ( $has_thumbnail_url === false ) {
+		$search  = 'class="thickbox"></a>';
+		$replace = 'class="thickbox">' . esc_html( $post_type_object->labels->set_featured_image ) . '</a>';
+	} else {
+		$search  = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail"></a></p>';
+		$replace = '<p class="hide-if-no-js"><a href="#" id="remove-post-thumbnail">' . esc_html( $post_type_object->labels->remove_featured_image ) . '</a></p>';
+	}
+
 	$content = str_replace( $search, $replace, $content );
 
 	return $content;
