@@ -14,14 +14,14 @@ declare( strict_types=1 );
  * @package   network-media-library
  * @link      https://github.com/humanmade/network-media-library
  * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
- * @copyright 2018 John Blackbourn
+ * @copyright 2019 Human Made
  * @license   https://opensource.org/licenses/MIT
  *
  * Plugin Name: Network Media Library
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/humanmade/network-media-library
- * Version:     1.4.0
+ * Version:     1.4.1
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
  * Author URI:  https://github.com/humanmade/network-media-library/graphs/contributors
  * License:     MIT
