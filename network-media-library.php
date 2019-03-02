@@ -377,6 +377,69 @@ function allow_media_library_access( array $caps, string $cap, int $user_id, arr
 	return ( $user_has_permission ? [ 'exist' ] : $caps );
 }
 
+class ACF_Value_Filter {
+
+	/**
+	 * Stores the value of the field.
+	 *
+	 * @var mixed Field value.
+	 */
+	protected $value = null;
+
+	/**
+	 * Sets up the necessary action and filter callbacks.
+	 */
+	public function __construct() {
+		add_filter( 'acf/load_value/type=image', [ $this, 'filter_acf_attachment_load_value' ], 0, 3 );
+		add_filter( 'acf/format_value/type=image', [ $this, 'filter_acf_attachment_format_value' ], 9999, 3 );
+	}
+
+	/**
+	 * Fiters the return value when using field retrieval functions in Advanced Custom Fields.
+	 *
+	 * @param mixed      $value   The field value.
+	 * @param int|string $post_id The post ID for this value.
+	 * @param array      $field   The field array.
+	 * @return mixed The updated value.
+	 */
+	public function filter_acf_attachment_load_value( $value, $post_id, array $field ) {
+		$image = $value;
+
+		if ( ! is_media_site() && ! is_admin() ) {
+			switch_to_media_site();
+
+			switch ( $field['return_format'] ) {
+				case 'url':
+					$image = wp_get_attachment_url( $value );
+					break;
+				case 'array':
+					$image = acf_get_attachment( $value );
+					break;
+			}
+
+			restore_current_blog();
+		}
+
+		$this->value = $image;
+
+		return $image;
+	}
+
+	/**
+	 * Fiters the optionally formatted value when using field retrieval functions in Advanced Custom Fields.
+	 *
+	 * @param mixed      $value   The field value.
+	 * @param int|string $post_id The post ID for this value.
+	 * @param array      $field   The field array.
+	 * @return mixed The updated value.
+	 */
+	public function filter_acf_attachment_format_value( $value, $post_id, array $field ) {
+		return $this->value;
+	}
+}
+
+new ACF_Value_Filter();
+
 /**
  * A class which handles saving the post's featured image ID.
  *
