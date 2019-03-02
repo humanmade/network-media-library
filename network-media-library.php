@@ -33,7 +33,7 @@ declare( strict_types=1 );
 
 namespace Network_Media_Library;
 
-use WP_Post, WP_User;
+use WP_Post;
 
 /**
  * Don't call this file directly.
