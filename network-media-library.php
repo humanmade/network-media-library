@@ -89,8 +89,10 @@ function get_site_id() : int {
 /**
  * Switches the current site ID to the network media library site ID.
  */
-function switch_to_media_site() {
+function switch_to_media_site( $value = null ) {
 	switch_to_blog( get_site_id() );
+
+	return $value;
 }
 
 /**
