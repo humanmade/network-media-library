@@ -41,12 +41,13 @@ Attachments can be deleted only from within the admin area of the central media 
 
 Network Media Library works transparently and seamlessly with all built-in WordPress media functionality, including uploading files, cropping images, inserting media into posts, and viewing attachments. Its functionality works with the site icon, site logo, background and header images, featured images, galleries, the audio and image widgets, and regular media management.
 
-The plugin works with the REST API, XML-RPC, and all standard Ajax endpoints for media management.
+The plugin works with the block editor, the classic editor, the REST API, XML-RPC, and all standard Ajax endpoints for media management.
 
 Links to media from other sites mostly work, although there are a couple of edge case bugs in WordPress core that need to be fixed (I'll get to these soon).
 
-Compatibility with third-party plugins is good, but not guaranteed. The following plugins are explicitly supported by Network Media Library:
+Compatibility with third-party plugins is good, but not guaranteed. The following plugins and libraries are explicitly supported by Network Media Library:
 
+* [Advanced Custom Fields](https://wordpress.org/plugins/advanced-custom-fields/)
 * [Regenerate Thumbnails](https://wordpress.org/plugins/regenerate-thumbnails/)
 * [WP User Avatars](https://wordpress.org/plugins/wp-user-avatars/)
 
@@ -58,7 +59,7 @@ The following plugins and libraries have been tested and confirmed as compatible
 * [Stream](https://wordpress.org/plugins/stream/)
 * [User Profile Picture](https://wordpress.org/plugins/metronet-profile-picture/)
 
-I plan to fully test (and add support if necessary) many other plugins and libraries, including CMB2, ACF, and many gallery and media management plugins. Stay tuned for updates!
+I plan to fully test (and add support if necessary) many other plugins and libraries, including CMB2, Fieldmanager, and many gallery and media management plugins. Stay tuned for updates!
 
 ## Screenshots
 
