@@ -516,9 +516,7 @@ class Post_Thumbnail_Saver {
 	 * @param bool    $update  Whether this is an existing post being updated or not.
 	 */
 	public function action_save_post( $post_id, WP_Post $post, bool $update ) {
-		if ( empty( $this->thumbnail_ids[ $post->ID ] ) || -1 === $this->thumbnail_ids[ $post->ID ] ) {
-			delete_post_meta( $post->ID, '_thumbnail_id' );
-		} else {
+		if ( ! empty( $this->thumbnail_ids[ $post->ID ] ) && ( -1 !== $this->thumbnail_ids[ $post->ID ] ) ) {
 			update_post_meta( $post->ID, '_thumbnail_id', $this->thumbnail_ids[ $post->ID ] );
 		}
 	}
