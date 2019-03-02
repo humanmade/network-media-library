@@ -287,6 +287,10 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
  * @param WP_REST_Request $request Request used to generate the response.
  */
 add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP_REST_Request $request ) {
+	if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+		return $result;
+	}
+
 	$media_routes = [
 		'/wp/v2/media',
 		'/regenerate-thumbnails/',
