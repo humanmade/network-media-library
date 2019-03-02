@@ -447,6 +447,32 @@ class ACF_Value_Filter {
 
 new ACF_Value_Filter();
 
+class ACF_Field_Rendering {
+
+	protected $switched = false;
+
+	public function __construct() {
+		add_action( 'acf/render_field', [ $this, 'maybe_restore_current_blog' ], -999 );
+		add_action( 'acf/render_field/type=file', [ $this, 'maybe_switch_to_media_site' ], 0 );
+	}
+
+	public function maybe_switch_to_media_site() {
+		$this->switched = true;
+
+		switch_to_media_site();
+	}
+
+	public function maybe_restore_current_blog() {
+		if ( ! empty( $this->switched ) ) {
+			restore_current_blog();
+		}
+
+		$this->switched = false;
+	}
+}
+
+new ACF_Field_Rendering();
+
 /**
  * A class which handles saving the post's featured image ID.
  *
