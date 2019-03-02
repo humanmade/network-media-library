@@ -6,14 +6,6 @@ Network Media Library is a plugin for WordPress Multisite which provides a centr
 
 This small plugin transparently shares media from one central media library site to all the other sites on the network. All media that's uploaded gets transparently directed to the central media site, and subsequently made available network-wide. Nothing is copied, cloned, synchronised, or mirrored, so for each file that's uploaded there's only one attachment and one copy of the file.
 
-Site ID `2` is used by default as the central media library. You can configure the media library site ID via the filter hook `network-media-library/site_id`:
-
-```php
-add_filter( 'network-media-library/site_id', function( $site_id ) {
-    return 123;
-} );
-```
-
 ## Minimum Requirements ##
 
 **PHP:** 7.0  
@@ -25,9 +17,17 @@ The plugin is available as a [Composer package](https://packagist.org/packages/h
 
     composer require humanmade/network-media-library
 
-If you don't wish to use Composer, install the plugin as you would normally.
+If you don't use Composer, install the plugin as you would normally.
 
-The plugin should either be installed as a mu-plugin or network activated. It cannot be activated on individual sites on the network.
+The plugin should either be installed as a mu-plugin or network activated. It's a network plugin and therefore cannot be activated on individual sites on the network.
+
+Site ID `2` is used by default as the central media library. You should configure your media library site ID via the filter hook `network-media-library/site_id`:
+
+```php
+add_filter( 'network-media-library/site_id', function( $site_id ) {
+    return 123;
+} );
+```
 
 ## Usage
 
