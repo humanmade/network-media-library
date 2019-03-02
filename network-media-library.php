@@ -291,6 +291,10 @@ add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP
 		return $result;
 	}
 
+	if ( is_media_site() ) {
+		return $result;
+	}
+
 	$media_routes = [
 		'/wp/v2/media',
 		'/regenerate-thumbnails/',
