@@ -390,8 +390,15 @@ class ACF_Value_Filter {
 	 * Sets up the necessary action and filter callbacks.
 	 */
 	public function __construct() {
-		add_filter( 'acf/load_value/type=image', [ $this, 'filter_acf_attachment_load_value' ], 0, 3 );
-		add_filter( 'acf/format_value/type=image', [ $this, 'filter_acf_attachment_format_value' ], 9999, 3 );
+		$field_types = [
+			'image',
+			'file',
+		];
+
+		foreach ( $field_types as $type ) {
+			add_filter( "acf/load_value/type={$type}", [ $this, 'filter_acf_attachment_load_value' ], 0, 3 );
+			add_filter( "acf/format_value/type={$type}", [ $this, 'filter_acf_attachment_format_value' ], 9999, 3 );
+		}
 	}
 
 	/**
