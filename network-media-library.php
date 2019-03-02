@@ -113,29 +113,6 @@ function prevent_attaching() {
 	unset( $_REQUEST['post_id'] );
 }
 
-add_action( 'admin_head-upload.php', __NAMESPACE__ . '\enqueue_styles' );
-/**
- * Outputs some styles on the Media screen when we're not on the network media library site.
- */
-function enqueue_styles() {
-	if ( is_media_site() ) {
-		return;
-	}
-
-	?>
-	<style>
-		.wp-filter .media-grid-view-switch a {
-			width: 0;
-		}
-
-		.wp-core-ui .select-mode-toggle-button,
-		.wp-filter .media-grid-view-switch a::before {
-			display: none;
-		}
-	</style>
-	<?php
-}
-
 add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3 );
 /**
  * Filters the admin post thumbnail HTML markup to return.
@@ -239,13 +216,27 @@ add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\switch_to_media_site'
 add_action( 'load-async-upload.php', __NAMESPACE__ . '\prevent_attaching', 0 );
 add_action( 'wp_ajax_upload-attachment', __NAMESPACE__ . '\prevent_attaching', 0 );
 
-// Disallow access to the "List" mode on the Media screen.
-add_action( 'load-upload.php', function() {
+// Allow access to the "List" mode on the Media screen.
+add_action( 'parse_request', function() {
 	if ( is_media_site() ) {
 		return;
 	}
 
-	$_GET['mode'] = 'grid';
+	if ( 'upload' !== get_current_screen()->id ) {
+		return;
+	}
+
+	switch_to_media_site();
+
+	add_filter( 'posts_pre_query', function( $value ) {
+		restore_current_blog();
+
+		return $value;
+	} );
+
+	add_action( 'loop_start', __NAMESPACE__ . '\switch_to_media_site', 0 );
+	add_action( 'loop_stop', 'restore_current_blog', 999 );
+
 }, 0 );
 
 // Allow attachment details to be fetched and saved.
