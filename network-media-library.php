@@ -376,6 +376,23 @@ function allow_media_library_access( array $caps, string $cap, int $user_id, arr
 	return ( $user_has_permission ? [ 'exist' ] : $caps );
 }
 
+function make_content_images_responsive( $content ) {
+	if ( is_media_site() ) {
+		return $content;
+	}
+
+	switch_to_media_site();
+
+	$content = wp_make_content_images_responsive( $content );
+
+	restore_current_blog();
+
+	return $content;
+}
+
+remove_filter( 'the_content', 'wp_make_content_images_responsive' );
+add_filter( 'the_content', __NAMESPACE__ . '\make_content_images_responsive' );
+
 class ACF_Value_Filter {
 
 	/**
