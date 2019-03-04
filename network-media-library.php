@@ -545,3 +545,56 @@ class Post_Thumbnail_Saver {
 }
 
 new Post_Thumbnail_Saver();
+
+/**
+ * A class which handles saving the post's featured image ID when submitted from a REST request.
+ *
+ * This handling is needed because adding a featured image from the Gutenberg editor fires off
+ * a REST request to `/wp-json/wp/v2/posts/<id>`, with a request payload containing `featured_media`
+ * with the ID of the featured image. A call to `set_post_thumbnail()` validates that the featured
+ * image post ID exists, and if the post ID does not exist, `handle_featured_media` returns a WP_Error
+ * with a code of `rest_invalid_featured_media`.
+ *
+ * There is a chance that the fetured image on the media site could have a post ID that is not a
+ * valid post ID on the site the featured image is being applied to (for example, a post has been
+ * deleted). After the post has been submitted via the REST request, the featured image is re-applied
+ * to ensure that it is saved with the post.
+ */
+class Post_Thumbnail_Saver_REST {
+
+	/**
+	 * Sets up the necessary action callback if the post is being saved from a REST request.
+	 */
+	public function __construct() {
+		if ( defined( 'REST_REQUEST' ) || REST_REQUEST ) {
+			add_action( 'pre_post_update', [ $this, 'action_pre_post_update' ], 10, 2 );
+		}
+	}
+
+	/**
+	 * Hooks into the correct action of `rest_insert_`, based on the post type being saved.
+	 *
+	 * @param int   $post_id Post ID.
+	 * @param array $data    Array of unslashed post data.
+	 */
+	public function action_pre_post_update( int $post_id, array $data ) {
+		add_action( 'rest_insert_' . get_post_type( $post_id ), [ $this, 'action_rest_insert' ], 10, 3 );
+	}
+
+	/**
+	 * Re-saves the featured image ID for the given post.
+	 *
+	 * @param WP_Post         $post     Inserted or updated post object.
+	 * @param WP_REST_Request $request  Request object.
+	 * @param bool            $creating True when creating a post, false when updating.
+	 */
+	public function action_rest_insert( $post, $request, bool $creating ) {
+		$request_json = $request->get_json_params();
+		
+		if ( array_key_exists( 'featured_media', $request_json ) ) {
+			update_post_meta( $post->ID, '_thumbnail_id', $request_json[ 'featured_media' ] );
+		}
+	}
+}
+
+new Post_Thumbnail_Saver_REST();
