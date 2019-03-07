@@ -52,12 +52,13 @@ Compatibility with third-party plugins is good, but not guaranteed. The followin
 The following plugins and libraries have been tested and confirmed as compatible out of the box:
 
 * [BuddyPress](https://wordpress.org/plugins/buddypress/)
+* [CMB2](https://github.com/CMB2/CMB2)
 * [Extended CPTs](https://github.com/johnbillion/extended-cpts)
 * [Gutenberg](https://wordpress.org/plugins/gutenberg/)
 * [Stream](https://wordpress.org/plugins/stream/)
 * [User Profile Picture](https://wordpress.org/plugins/metronet-profile-picture/)
 
-I plan to fully test (and add support if necessary) many other plugins and libraries, including CMB2, Fieldmanager, and many gallery and media management plugins. Stay tuned for updates!
+I plan to fully test (and add support if necessary) many other plugins and libraries, including WooCommerce, Fieldmanager, NextGen Gallery, and many gallery and media management plugins. Stay tuned for updates!
 
 ## Screenshots
 
