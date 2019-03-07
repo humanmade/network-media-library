@@ -88,6 +88,9 @@ function get_site_id() : int {
 
 /**
  * Switches the current site ID to the network media library site ID.
+ *
+ * @param mixed $value An optional value used when this function is used as a hook filter.
+ * @return mixed The value of the `$value` parameter.
  */
 function switch_to_media_site( $value = null ) {
 	switch_to_blog( get_site_id() );
@@ -376,6 +379,14 @@ function allow_media_library_access( array $caps, string $cap, int $user_id, arr
 	return ( $user_has_permission ? [ 'exist' ] : $caps );
 }
 
+/**
+ * Filters 'img' elements in post content to add 'srcset' and 'sizes' attributes.
+ *
+ * @see wp_make_content_images_responsive()
+ *
+ * @param string $content The raw post content to be filtered.
+ * @return string Converted content with 'srcset' and 'sizes' attributes added to images.
+ */
 function make_content_images_responsive( $content ) {
 	if ( is_media_site() ) {
 		return $content;
@@ -393,6 +404,9 @@ function make_content_images_responsive( $content ) {
 remove_filter( 'the_content', 'wp_make_content_images_responsive' );
 add_filter( 'the_content', __NAMESPACE__ . '\make_content_images_responsive' );
 
+/**
+ * A class which encapsulates the filtering of ACF field values.
+ */
 class ACF_Value_Filter {
 
 	/**
@@ -463,21 +477,38 @@ class ACF_Value_Filter {
 
 new ACF_Value_Filter();
 
+/**
+ * A class which encapsulates the rendering of ACF field controls.
+ */
 class ACF_Field_Rendering {
 
+	/**
+	 * Stored the site switching state between instances of fields.
+	 *
+	 * @var bool Whether the previous field triggered a switch to the central media site.
+	 */
 	protected $switched = false;
 
+	/**
+	 * Sets up the necessary action and filter callbacks.
+	 */
 	public function __construct() {
 		add_action( 'acf/render_field', [ $this, 'maybe_restore_current_blog' ], -999 );
 		add_action( 'acf/render_field/type=file', [ $this, 'maybe_switch_to_media_site' ], 0 );
 	}
 
+	/**
+	 * Switches to the central media site.
+	 */
 	public function maybe_switch_to_media_site() {
 		$this->switched = true;
 
 		switch_to_media_site();
 	}
 
+	/**
+	 * Switches back to the current site if the previous field triggered a switch to the central media site.
+	 */
 	public function maybe_restore_current_blog() {
 		if ( ! empty( $this->switched ) ) {
 			restore_current_blog();
