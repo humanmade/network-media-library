@@ -6,12 +6,16 @@
 
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/features/*</exclude-pattern>
 
 	<!-- Include the PHP version compatibility standard. -->
 	<rule ref="PHPCompatibility"/>
 
 	<rule ref="WordPress-Extra">
 		<exclude name="WordPress.Files.FileName" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket" />
+		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine" />
 	</rule>
 
 	<rule ref="NeutronStandard">

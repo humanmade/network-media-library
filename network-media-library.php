@@ -1,6 +1,4 @@
-<?php # -*- coding: utf-8 -*-
-declare( strict_types=1 );
-
+<?php
 /**
  * Network Media Library plugin for WordPress
  *
@@ -30,6 +28,8 @@ declare( strict_types=1 );
  * Domain Path: /languages
  * Requires PHP: 7.0
  */
+
+declare( strict_types=1 );
 
 namespace Network_Media_Library;
 
@@ -146,7 +146,7 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
 	$post_type_object  = get_post_type_object( $post->post_type );
 	$has_thumbnail_url = get_the_post_thumbnail_url( $post_id ) !== false;
 
-	if ( $has_thumbnail_url === false ) {
+	if ( false === $has_thumbnail_url ) {
 		$search  = 'class="thickbox"></a>';
 		$replace = 'class="thickbox">' . esc_html( $post_type_object->labels->set_featured_image ) . '</a>';
 	} else {
