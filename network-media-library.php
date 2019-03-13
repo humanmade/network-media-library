@@ -459,12 +459,14 @@ class ACF_Value_Filter {
 	public function filter_acf_attachment_load_value( $value, $post_id, array $field ) {
 		$image = $value;
 
-		if ( ! is_media_site() && ! is_admin() ) {
-			switch_to_media_site();
-			$image = $this->transform_acf_to_return_format( $field['return_format'], $value );
-			restore_current_blog();
-		} else {
-			$image = $this->transform_acf_to_return_format( $field['return_format'], $value );
+		if ( ! is_admin() ) {
+			if ( ! is_media_site() ) {
+				switch_to_media_site();
+				$image = $this->transform_acf_to_return_format( $field['return_format'], $value );
+				restore_current_blog();
+			} else {
+				$image = $this->transform_acf_to_return_format( $field['return_format'], $value );
+			}
 		}
 
 		$this->value = $image;
