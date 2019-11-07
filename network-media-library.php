@@ -410,9 +410,9 @@ add_filter( 'the_content', __NAMESPACE__ . '\make_content_images_responsive' );
 class ACF_Value_Filter {
 
 	/**
-	 * Stores the value of the field.
+	 * Stores the value of the field[s].
 	 *
-	 * @var mixed Field value.
+	 * @var mixed Field value array.
 	 */
 	protected $value = null;
 
@@ -424,6 +424,7 @@ class ACF_Value_Filter {
 			'image',
 			'file',
 		];
+		$value = [];
 
 		foreach ( $field_types as $type ) {
 			add_filter( "acf/load_value/type={$type}", [ $this, 'filter_acf_attachment_load_value' ], 0, 3 );
@@ -457,7 +458,7 @@ class ACF_Value_Filter {
 			restore_current_blog();
 		}
 
-		$this->value = $image;
+		$this->value[$field['name']] = $image;
 
 		return $image;
 	}
@@ -471,7 +472,7 @@ class ACF_Value_Filter {
 	 * @return mixed The updated value.
 	 */
 	public function filter_acf_attachment_format_value( $value, $post_id, array $field ) {
-		return $this->value;
+		return $this->value[$field['name']];
 	}
 }
 
