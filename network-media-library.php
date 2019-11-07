@@ -356,7 +356,7 @@ function allow_media_library_access( array $caps, string $cap, int $user_id, arr
 
 	if ( 'edit_post' === $cap ) {
 		$content = get_post( $args[0] );
-		if ( 'attachment' !== $content->post_type ) {
+		if ( ! isset( $content ) || 'attachment' !== $content->post_type ) {
 			return $caps;
 		}
 
