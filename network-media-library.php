@@ -494,8 +494,10 @@ class ACF_Field_Rendering {
 	 * Sets up the necessary action and filter callbacks.
 	 */
 	public function __construct() {
+		$this->switched = false;
 		add_action( 'acf/render_field', [ $this, 'maybe_restore_current_blog' ], -999 );
 		add_action( 'acf/render_field/type=file', [ $this, 'maybe_switch_to_media_site' ], 0 );
+		add_action( 'acf/render_field/type=file', [ $this, 'maybe_restore_current_blog' ], 11 );
 	}
 
 	/**
@@ -511,7 +513,7 @@ class ACF_Field_Rendering {
 	 * Switches back to the current site if the previous field triggered a switch to the central media site.
 	 */
 	public function maybe_restore_current_blog() {
-		if ( ! empty( $this->switched ) ) {
+		if ( true === $this->switched ) {
 			restore_current_blog();
 		}
 
