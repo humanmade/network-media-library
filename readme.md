@@ -81,3 +81,7 @@ If the Network Media Library plugin doesn't suit your needs, try these alternati
 
 * [Multisite Global Media](https://github.com/bueltge/multisite-global-media)
 * [Network Shared Media](https://wordpress.org/plugins/network-shared-media/)
+
+## Additions
+
+* Items added by Chromatix to fix issues with compatibility with ACF Pro v5

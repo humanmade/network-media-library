@@ -10,18 +10,18 @@
  * - [Network Shared Media](https://wordpress.org/plugins/network-shared-media/)
  *
  * @package   network-media-library
- * @link      https://github.com/humanmade/network-media-library
- * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
- * @copyright 2019 Human Made
+ * @link      https://github.com/chromatixAU/network-media-library
+ * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>, Julian Chan <julian.chan@chromatix.com.au>
+ * @copyright 2019 Human Made, 2019 Chromatix
  * @license   https://opensource.org/licenses/MIT
  *
  * Plugin Name: Network Media Library
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
- * Plugin URI:  https://github.com/humanmade/network-media-library
- * Version:     1.5.0
- * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
- * Author URI:  https://github.com/humanmade/network-media-library/graphs/contributors
+ * Plugin URI:  https://github.com/chromatixAU/network-media-library
+ * Version:     1.5.1
+ * Author:      John Blackbourn, Dominik Schilling, Frank Bültge, Julian Chan
+ * Author URI:  https://github.com/chromatixAU/network-media-library/graphs/contributors
  * License:     MIT
  * License URI: ./LICENSE
  * Text Domain: network-media-library
