@@ -137,6 +137,17 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
 
 	switch_to_blog( get_site_id() );
 	$switched = true;
+	
+	$post_type_check = get_post_type($thumbnail_id);
+	if($post_type_check !== 'attachment'){
+	    $switched = false;
+	    restore_current_blog();
+	    
+	    update_post_meta($post_id, '_thumbnail_id', null);
+	    
+	    return $content;
+	}
+	
 	// $thumbnail_id is passed instead of post_id to avoid warning messages of nonexistent post object.
 	$content  = _wp_post_thumbnail_html( $thumbnail_id, $thumbnail_id );
 	$switched = false;
