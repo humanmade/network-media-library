@@ -85,3 +85,4 @@ If the Network Media Library plugin doesn't suit your needs, try these alternati
 ## Additions
 
 * Items added by Chromatix to fix issues with compatibility with ACF Pro v5
+* Fixed issue with deleted images from networked media
