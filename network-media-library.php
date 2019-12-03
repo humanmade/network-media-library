@@ -120,7 +120,21 @@ function switch_on_attachment() {
 	if ( is_media_site() ) {
 		return;
 	}
-	switch_to_media_site();	
+
+	$referer_path = parse_url( $_SERVER[ 'HTTP_REFERER' ], PHP_URL_PATH );
+
+	if ( endsWith( $referer_path, 'upload.php' ) ) {
+		switch_to_media_site();	
+	}
+}
+
+function endsWith($haystack, $needle) {
+	$length = strlen($needle);
+	if ($length == 0) {
+		return true;
+	}
+
+	return (substr($haystack, -$length) === $needle);
 }
 
 add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3 );
