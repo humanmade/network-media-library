@@ -116,6 +116,9 @@ function prevent_attaching() {
 	unset( $_REQUEST['post_id'] );
 }
 
+/**
+ * Switches to the media site when on local site when it is the media library page i.e. upload.php
+ */
 function switch_on_attachment() {
 	if ( is_media_site() ) {
 		return;
@@ -129,6 +132,9 @@ function switch_on_attachment() {
 	}
 }
 
+/**
+ * Utility Function for checking if string ends with substring
+ */
 function endsWith($haystack, $needle) {
 	$length = strlen($needle);
 	if ($length == 0) {
@@ -310,6 +316,8 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
 	}	
 	// Prevent media from being deleted from any site other than the network media library site.	
 	// This is needed in order to prevent incorrect posts from being deleted on the local site.	
+	// Chromatix: allow deletion from local site media used in conjunction with wp_ajax_delete-post action so you can
+	// delete, but only on the upload.php page
 	$referer_array = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
 	$referer_path = $referer_array['path'];
 	
