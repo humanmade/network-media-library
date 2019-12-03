@@ -116,6 +116,13 @@ function prevent_attaching() {
 	unset( $_REQUEST['post_id'] );
 }
 
+function switch_on_attachment() {
+	if ( is_media_site() ) {
+		return;
+	}
+	switch_to_media_site();	
+}
+
 add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3 );
 /**
  * Filters the admin post thumbnail HTML markup to return.
@@ -269,28 +276,10 @@ add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_media_site'
 add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
 add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
 
+add_action( 'wp_ajax_delete-post', __NAMESPACE__ . '\switch_on_attachment', 0 );
+
 // Support for the WP User Avatars plugin.
 add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_media_site', 0 );
-
-/**
- * Filters the attachment data prepared for JavaScript.
- *
- * @param array      $response   Array of prepared attachment data.
- * @param WP_Post    $attachment Attachment ID or object.
- * @param array|bool $meta       Array of attachment meta data, or boolean false if there is none.
- * @return array Array of prepared attachment data.
- */
-add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, $meta ) : array {
-	if ( is_media_site() ) {
-		return $response;
-	}
-
-	// Prevent media from being deleted from any site other than the network media library site.
-	// This is needed in order to prevent incorrect posts from being deleted on the local site.
-	unset( $response['nonces']['delete'] );
-
-	return $response;
-}, 0, 3 );
 
 /**
  * Filters the pre-dispatch value of REST API requests in order to switch to the network media library site when querying media.
