@@ -121,8 +121,9 @@ function switch_on_attachment() {
 		return;
 	}
 
-	$referer_path = parse_url( $_SERVER[ 'HTTP_REFERER' ], PHP_URL_PATH );
-
+	$referer_array = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
+	$referer_path = $referer_array['path'];
+	
 	if ( endsWith( $referer_path, 'upload.php' ) ) {
 		switch_to_media_site();	
 	}
@@ -294,6 +295,30 @@ add_action( 'wp_ajax_delete-post', __NAMESPACE__ . '\switch_on_attachment', 0 );
 
 // Support for the WP User Avatars plugin.
 add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_media_site', 0 );
+
+/**	
+ * Filters the attachment data prepared for JavaScript.	
+ *	
+ * @param array      $response   Array of prepared attachment data.	
+ * @param WP_Post    $attachment Attachment ID or object.	
+ * @param array|bool $meta       Array of attachment meta data, or boolean false if there is none.	
+ * @return array Array of prepared attachment data.	
+ */	
+add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, $meta ) : array {	
+	if ( is_media_site() ) {	
+		return $response;	
+	}	
+	// Prevent media from being deleted from any site other than the network media library site.	
+	// This is needed in order to prevent incorrect posts from being deleted on the local site.	
+	$referer_array = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
+	$referer_path = $referer_array['path'];
+	
+	if ( ! endsWith( $referer_path, 'upload.php' ) ) {
+		unset( $response['nonces']['delete'] );	
+	}
+	
+	return $response;	
+}, 0, 3 );
 
 /**
  * Filters the pre-dispatch value of REST API requests in order to switch to the network media library site when querying media.

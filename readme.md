@@ -86,4 +86,4 @@ If the Network Media Library plugin doesn't suit your needs, try these alternati
 
 * Items added by Chromatix to fix issues with compatibility with ACF Pro v5
 * Fixed issue with deleted images from networked media
-* Removing the code which disallows media deletion.  The 'delete-post' ajax action is only used for the media library in wp-admin and wp-includes, we will switch to the media site on wp_ajax_delete-post action hook instead, if the website uses this ajax hook in the future, this should be revisited. 
+* Allow for deletion of attachments/files only if you are in the media library when not on the global media site instead of completely blocking attachment/file deletion 
