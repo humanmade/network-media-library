@@ -19,7 +19,7 @@
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/chromatixAU/network-media-library
- * Version:     1.5.2
+ * Version:     1.5.3
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge, Julian Chan
  * Author URI:  https://github.com/chromatixAU/network-media-library/graphs/contributors
  * License:     MIT
