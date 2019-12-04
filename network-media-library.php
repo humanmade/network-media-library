@@ -125,6 +125,13 @@ function switch_on_attachment() {
 	}
 
 	$referer_array = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
+	if ( $referer_array === false ) {
+		if ( ! wp_doing_ajax() ) {
+			echo '<pre>Referer doesn\'t exist when deleting post.  Preventing post deletion.</pre>';
+		}
+		exit;
+	}
+
 	$referer_path = $referer_array['path'];
 	
 	if ( endsWith( $referer_path, 'upload.php' ) ) {
@@ -319,6 +326,14 @@ add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post 
 	// Chromatix: allow deletion from local site media used in conjunction with wp_ajax_delete-post action so you can
 	// delete, but only on the upload.php page
 	$referer_array = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
+	if ( $referer_array === false ) {
+		if ( ! wp_doing_ajax() ) {
+			echo '<pre>Referer doesn\'t exist when preparing attachment for JS.  Preventing deletion.</pre>';
+		}
+		unset( $response['nonces']['delete'] );	
+		return $response;
+	}
+	
 	$referer_path = $referer_array['path'];
 	
 	if ( ! endsWith( $referer_path, 'upload.php' ) ) {
