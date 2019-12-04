@@ -86,3 +86,4 @@ If the Network Media Library plugin doesn't suit your needs, try these alternati
 
 * Items added by Chromatix to fix issues with compatibility with ACF Pro v5
 * Fixed issue with deleted images from networked media
+* Allow for deletion of attachments/files on local site if you are on the media library page (i.e. uploads.php) instead of totally blocking. 

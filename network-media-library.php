@@ -19,7 +19,7 @@
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/chromatixAU/network-media-library
- * Version:     1.5.2
+ * Version:     1.5.3
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge, Julian Chan
  * Author URI:  https://github.com/chromatixAU/network-media-library/graphs/contributors
  * License:     MIT
@@ -114,6 +114,41 @@ function is_media_site() : bool {
  */
 function prevent_attaching() {
 	unset( $_REQUEST['post_id'] );
+}
+
+/**
+ * Switches to the media site when on local site when it is the media library page i.e. upload.php
+ */
+function switch_on_attachment() {
+	if ( is_media_site() ) {
+		return;
+	}
+
+	$referer_array = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
+	if ( $referer_array === false ) {
+		if ( ! wp_doing_ajax() ) {
+			echo '<pre>Referer doesn\'t exist when deleting post.  Preventing post deletion.</pre>';
+		}
+		exit;
+	}
+
+	$referer_path = $referer_array['path'];
+	
+	if ( endsWith( $referer_path, 'upload.php' ) ) {
+		switch_to_media_site();	
+	}
+}
+
+/**
+ * Utility Function for checking if string ends with substring
+ */
+function endsWith($haystack, $needle) {
+	$length = strlen($needle);
+	if ($length == 0) {
+		return true;
+	}
+
+	return (substr($haystack, -$length) === $needle);
 }
 
 add_filter( 'admin_post_thumbnail_html', __NAMESPACE__ . '\admin_post_thumbnail_html', 99, 3 );
@@ -269,27 +304,43 @@ add_action( 'wp_ajax_query-attachments', __NAMESPACE__ . '\switch_to_media_site'
 add_action( 'wp_ajax_send-attachment-to-editor', __NAMESPACE__ . '\switch_to_media_site', 0 );
 add_filter( 'map_meta_cap', __NAMESPACE__ . '\allow_media_library_access', 10, 4 );
 
+add_action( 'wp_ajax_delete-post', __NAMESPACE__ . '\switch_on_attachment', 0 );
+
 // Support for the WP User Avatars plugin.
 add_action( 'wp_ajax_assign_wp_user_avatars_media', __NAMESPACE__ . '\switch_to_media_site', 0 );
 
-/**
- * Filters the attachment data prepared for JavaScript.
- *
- * @param array      $response   Array of prepared attachment data.
- * @param WP_Post    $attachment Attachment ID or object.
- * @param array|bool $meta       Array of attachment meta data, or boolean false if there is none.
- * @return array Array of prepared attachment data.
- */
-add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, $meta ) : array {
-	if ( is_media_site() ) {
+/**	
+ * Filters the attachment data prepared for JavaScript.	
+ *	
+ * @param array      $response   Array of prepared attachment data.	
+ * @param WP_Post    $attachment Attachment ID or object.	
+ * @param array|bool $meta       Array of attachment meta data, or boolean false if there is none.	
+ * @return array Array of prepared attachment data.	
+ */	
+add_filter( 'wp_prepare_attachment_for_js', function( array $response, \WP_Post $attachment, $meta ) : array {	
+	if ( is_media_site() ) {	
+		return $response;	
+	}	
+	// Prevent media from being deleted from any site other than the network media library site.	
+	// This is needed in order to prevent incorrect posts from being deleted on the local site.	
+	// Chromatix: allow deletion from local site media used in conjunction with wp_ajax_delete-post action so you can
+	// delete, but only on the upload.php page
+	$referer_array = parse_url( $_SERVER[ 'HTTP_REFERER' ] );
+	if ( $referer_array === false ) {
+		if ( ! wp_doing_ajax() ) {
+			echo '<pre>Referer doesn\'t exist when preparing attachment for JS.  Preventing deletion.</pre>';
+		}
+		unset( $response['nonces']['delete'] );	
 		return $response;
 	}
-
-	// Prevent media from being deleted from any site other than the network media library site.
-	// This is needed in order to prevent incorrect posts from being deleted on the local site.
-	unset( $response['nonces']['delete'] );
-
-	return $response;
+	
+	$referer_path = $referer_array['path'];
+	
+	if ( ! endsWith( $referer_path, 'upload.php' ) ) {
+		unset( $response['nonces']['delete'] );	
+	}
+	
+	return $response;	
 }, 0, 3 );
 
 /**
