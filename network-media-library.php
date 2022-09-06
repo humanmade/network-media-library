@@ -11,7 +11,7 @@
  *
  * @package   network-media-library
  * @link      https://github.com/humanmade/network-media-library
- * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>
+ * @author    John Blackbourn <john@johnblackbourn.com>, Dominik Schilling <d.schilling@inpsyde.com>, Frank Bültge <f.bueltge@inpsyde.com>, Kite <ixkaito@gmail.com>
  * @copyright 2019 Human Made
  * @license   https://opensource.org/licenses/MIT
  *
@@ -19,7 +19,7 @@
  * Description: Network Media Library provides a central media library that's shared across all sites on the Multisite network.
  * Network:     true
  * Plugin URI:  https://github.com/humanmade/network-media-library
- * Version:     1.5.0
+ * Version:     1.6.0
  * Author:      John Blackbourn, Dominik Schilling, Frank Bültge
  * Author URI:  https://github.com/humanmade/network-media-library/graphs/contributors
  * License:     MIT
@@ -387,22 +387,22 @@ function allow_media_library_access( array $caps, string $cap, int $user_id, arr
  * @param string $content The raw post content to be filtered.
  * @return string Converted content with 'srcset' and 'sizes' attributes added to images.
  */
-function make_content_images_responsive( $content ) {
+function filter_content_tags( $content ) {
 	if ( is_media_site() ) {
-		return $content;
+		return wp_filter_content_tags( $content );
 	}
 
 	switch_to_media_site();
 
-	$content = wp_make_content_images_responsive( $content );
+	$content = wp_filter_content_tags( $content );
 
 	restore_current_blog();
 
 	return $content;
 }
 
-remove_filter( 'the_content', 'wp_make_content_images_responsive' );
-add_filter( 'the_content', __NAMESPACE__ . '\make_content_images_responsive' );
+remove_filter( 'the_content', 'wp_filter_content_tags' );
+add_filter( 'the_content', __NAMESPACE__ . '\filter_content_tags' );
 
 /**
  * A class which encapsulates the filtering of ACF field values.
@@ -426,40 +426,9 @@ class ACF_Value_Filter {
 		];
 
 		foreach ( $field_types as $type ) {
-			add_filter( "acf/load_value/type={$type}", [ $this, 'filter_acf_attachment_load_value' ], 0, 3 );
-			add_filter( "acf/format_value/type={$type}", [ $this, 'filter_acf_attachment_format_value' ], 9999, 3 );
+			add_filter( "acf/format_value/type={$type}", [ $this, 'set_value' ], 0, 3 );
+			add_filter( "acf/format_value/type={$type}", [ $this, 'filter_acf_attachment_format_value' ], 20, 3 );
 		}
-	}
-
-	/**
-	 * Fiters the return value when using field retrieval functions in Advanced Custom Fields.
-	 *
-	 * @param mixed      $value   The field value.
-	 * @param int|string $post_id The post ID for this value.
-	 * @param array      $field   The field array.
-	 * @return mixed The updated value.
-	 */
-	public function filter_acf_attachment_load_value( $value, $post_id, array $field ) {
-		$image = $value;
-
-		if ( ! is_media_site() && ! is_admin() ) {
-			switch_to_media_site();
-
-			switch ( $field['return_format'] ) {
-				case 'url':
-					$image = wp_get_attachment_url( $value );
-					break;
-				case 'array':
-					$image = acf_get_attachment( $value );
-					break;
-			}
-
-			restore_current_blog();
-		}
-
-		$this->value = $image;
-
-		return $image;
 	}
 
 	/**
@@ -470,8 +439,41 @@ class ACF_Value_Filter {
 	 * @param array      $field   The field array.
 	 * @return mixed The updated value.
 	 */
+	public function set_value( $value, $post_id, array $field ) {
+		// bail early if no value
+		if ( empty( $value ) ) {
+			return false;
+		}
+
+		// bail early if not numeric (error message)
+		if ( ! is_numeric( $value ) ) {
+			return false;
+		}
+
+		// convert to int
+		$value = intval( $value );
+
+		$this->value = $value;
+
+		return $value;
+	}
+
 	public function filter_acf_attachment_format_value( $value, $post_id, array $field ) {
-		return $this->value;
+		if ( ! is_media_site() && ! is_admin() ) {
+			switch_to_media_site();
+
+			if ( $field['return_format'] == 'url' ) {
+
+				$value = wp_get_attachment_url( $this->value );
+
+			} elseif ( $field['return_format'] == 'array' ) {
+
+				$value = acf_get_attachment( $this->value );
+			}
+
+			restore_current_blog();
+		}
+		return $value;
 	}
 }
 
@@ -541,8 +543,30 @@ class Post_Thumbnail_Saver {
 	 * Sets up the necessary action and filter callbacks.
 	 */
 	public function __construct() {
+		add_action( 'init', function() {
+			foreach ( get_post_types() as $post_type ) {
+				add_filter( "rest_pre_insert_{$post_type}", [ $this, 'filter_rest_pre_insert' ], 10, 2 );
+			}
+		} );
+
 		add_filter( 'wp_insert_post_data', [ $this, 'filter_wp_insert_post_data' ], 10, 2 );
 		add_action( 'save_post', [ $this, 'action_save_post' ], 10, 3 );
+	}
+
+	/**
+	 * Temporarily stores the ID of the featured image for the given post ID when the post is saved via the REST API.
+	 *
+	 * @param stdClass        $prepared_post An object representing a single post prepared
+	 *                                       for inserting or updating the database.
+	 * @param WP_REST_Request $request       Request object.
+	 * @return stdClass An object representing a single post prepared for inserting or updating the database.
+	 */
+	public function filter_rest_pre_insert( $prepared_post, $request ) {
+		if ( ! empty( $request['featured_media'] ) ) {
+			$this->thumbnail_ids[ $request['id'] ] = intval( $request['featured_media'] );
+		}
+
+		return $prepared_post;
 	}
 
 	/**
