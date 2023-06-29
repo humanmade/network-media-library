@@ -34,6 +34,7 @@ declare( strict_types=1 );
 namespace Network_Media_Library;
 
 use WP_Post;
+use WP_REST_Request;
 
 /**
  * Don't call this file directly.
@@ -576,3 +577,31 @@ class Post_Thumbnail_Saver {
 }
 
 new Post_Thumbnail_Saver();
+
+/**
+ * Sets the featured image manually for the subsite.
+ * Stops the WP Posts REST API Controlles from interfering.
+ *
+ * @param int $post_id The Post ID.
+ */
+add_action( 'pre_post_update', function ( int $post_id ): void {
+    if (! defined( 'REST_REQUEST' ) || ! REST_REQUEST) {
+        return;
+    }
+
+    $post_type = get_post_type( $post_id );
+    $callback = static function ( WP_Post $post, WP_REST_Request $request ): void {
+        $featured_media = $request->get_param( 'featured_media' );
+        if (empty( $featured_media )) {
+            return;
+        }
+
+        set_post_thumbnail( $post->ID, $featured_media );
+        update_post_meta( $post->ID, '_thumbnail_id', $featured_media );
+
+        // Prevent REST Controller from breaking the featured media again.
+        unset( $request['featured_media'] );
+    };
+
+    add_action( "rest_insert_{$post_type}", $callback, 10, 2 );
+} );
