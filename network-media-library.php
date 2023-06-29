@@ -382,27 +382,27 @@ function allow_media_library_access( array $caps, string $cap, int $user_id, arr
 /**
  * Filters 'img' elements in post content to add 'srcset' and 'sizes' attributes.
  *
- * @see wp_make_content_images_responsive()
+ * @see wp_filter_content_tags()
  *
  * @param string $content The raw post content to be filtered.
  * @return string Converted content with 'srcset' and 'sizes' attributes added to images.
  */
-function make_content_images_responsive( $content ) {
+function filter_content_tags( $content ) {
 	if ( is_media_site() ) {
-		return $content;
+		return wp_filter_content_tags( $content );
 	}
 
 	switch_to_media_site();
 
-	$content = wp_make_content_images_responsive( $content );
+	$content = wp_filter_content_tags( $content );
 
 	restore_current_blog();
 
 	return $content;
 }
 
-remove_filter( 'the_content', 'wp_make_content_images_responsive' );
-add_filter( 'the_content', __NAMESPACE__ . '\make_content_images_responsive' );
+remove_filter( 'the_content', 'wp_filter_content_tags' );
+add_filter( 'the_content', __NAMESPACE__ . '\filter_content_tags' );
 
 /**
  * A class which encapsulates the filtering of ACF field values.
