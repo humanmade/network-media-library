@@ -436,11 +436,10 @@ class ACF_Value_Filter {
 	 * Fiters the optionally formatted value when using field retrieval functions in Advanced Custom Fields.
 	 *
 	 * @param mixed      $value   The field value.
-	 * @param int|string $post_id The post ID for this value.
-	 * @param array      $field   The field array.
+   *
 	 * @return mixed The updated value.
 	 */
-	public function set_value( $value, $post_id, array $field ) {
+	public function set_value( $value ) {
 		if ( empty( $value ) ) {
 			return false;
 		}
