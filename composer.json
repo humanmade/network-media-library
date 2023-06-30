@@ -1,8 +1,12 @@
 {
-  "name": "humanmade/network-media-library",
+  "name": "itinerisltd/network-media-library",
   "type": "wordpress-muplugin",
   "description": "Network Media Library provides a central media library that's shared across all sites on the Multisite network.",
-  "keywords": ["wordpress", "plugin", "multisite"],
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "multisite"
+  ],
   "homepage": "https://github.com/humanmade/network-media-library",
   "license": "MIT",
   "authors": [
@@ -19,6 +23,11 @@
     {
       "name": "Frank Bültge",
       "homepage": "https://bueltge.de",
+      "role": "Developer"
+    },
+    {
+      "name": "Lee Hanbury-Pickett",
+      "homepage": "https://github.com/codepuncher",
       "role": "Developer"
     }
   ],
