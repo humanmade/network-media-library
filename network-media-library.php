@@ -427,40 +427,31 @@ class ACF_Value_Filter {
 		];
 
 		foreach ( $field_types as $type ) {
-			add_filter( "acf/load_value/type={$type}", [ $this, 'filter_acf_attachment_load_value' ], 0, 3 );
+			add_filter( "acf/format_value/type={$type}", [ $this, 'set_value' ], 0, 1 );
 			add_filter( "acf/format_value/type={$type}", [ $this, 'filter_acf_attachment_format_value' ], 9999, 3 );
 		}
 	}
 
 	/**
-	 * Fiters the return value when using field retrieval functions in Advanced Custom Fields.
+	 * Fiters the optionally formatted value when using field retrieval functions in Advanced Custom Fields.
 	 *
 	 * @param mixed      $value   The field value.
 	 * @param int|string $post_id The post ID for this value.
 	 * @param array      $field   The field array.
 	 * @return mixed The updated value.
 	 */
-	public function filter_acf_attachment_load_value( $value, $post_id, array $field ) {
-		$image = $value;
-
-		if ( ! is_media_site() && ! is_admin() ) {
-			switch_to_media_site();
-
-			switch ( $field['return_format'] ) {
-				case 'url':
-					$image = wp_get_attachment_url( $value );
-					break;
-				case 'array':
-					$image = acf_get_attachment( $value );
-					break;
-			}
-
-			restore_current_blog();
+	public function set_value( $value, $post_id, array $field ) {
+		if ( empty( $value ) ) {
+			return false;
 		}
 
-		$this->value = $image;
+		if ( ! is_numeric( $value ) ) {
+			return false;
+		}
 
-		return $image;
+		$this->value = absint( $value );
+
+		return $this->value;
 	}
 
 	/**
@@ -472,7 +463,21 @@ class ACF_Value_Filter {
 	 * @return mixed The updated value.
 	 */
 	public function filter_acf_attachment_format_value( $value, $post_id, array $field ) {
-		return $this->value;
+		if ( is_admin() || is_media_site() ) {
+			return $value;
+		}
+
+		switch_to_media_site();
+
+		if ( 'url' === $field['return_format'] ) {
+			$value = wp_get_attachment_url( $this->value );
+		} elseif ( 'array' === $field['return_format'] ) {
+			$value = acf_get_attachment( $this->value );
+		}
+
+		restore_current_blog();
+
+		return $value;
 	}
 }
 
