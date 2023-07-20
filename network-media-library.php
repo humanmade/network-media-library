@@ -166,10 +166,10 @@ function admin_post_thumbnail_html( string $content, $post_id, $thumbnail_id ) :
  * @param array|false  $image         Either array with src, width & height, icon src, or false.
  * @param int          $attachment_id Image attachment ID.
  * @param string|array $size          Size of image. Image size or array of width and height values.
- * @param bool         $icon          Whether the image should be treated as an icon.
+ * @param bool|null         $icon          Whether the image should be treated as an icon.
  * @return array|false Either array with src, width & height, icon src, or false.
  */
-add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $size, bool $icon ) {
+add_filter( 'wp_get_attachment_image_src', function( $image, $attachment_id, $size, ?bool $icon ) {
 	static $switched = false;
 
 	if ( $switched ) {
