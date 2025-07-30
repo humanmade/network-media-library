@@ -225,7 +225,11 @@ add_action( 'parse_request', function() {
 		return;
 	}
 
-	if ( ! function_exists( 'get_current_screen' ) || 'upload' !== get_current_screen()->id ) {
+	if ( ! function_exists( 'get_current_screen' ) || !get_current_screen() ) {
+		return;
+	}
+
+	if('upload' !== get_current_screen()->id){
 		return;
 	}
 
