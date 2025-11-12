@@ -110,6 +110,50 @@ function is_media_site() : bool {
 }
 
 /**
+ * Filters the upload directory to use the network media library site's upload path.
+ *
+ * @param array $uploads Array of upload directory data.
+ * @return array Modified array of upload directory data.
+ */
+function filter_upload_dir($uploads) {
+    // Static variable to prevent recursive calls
+    static $in_filter = false;
+
+    // If already in the filter, return the original uploads array
+    if ($in_filter) {
+        return $uploads;
+    }
+
+    // Set the static variable to true to indicate we're in the filter
+    $in_filter = true;
+
+    // If not on the media site, switch to it
+    if (!is_media_site()) {
+        switch_to_media_site();
+        $media_uploads = wp_get_upload_dir();
+        restore_current_blog();
+
+        // If media uploads directory is valid, update the uploads array
+        if ($media_uploads && !is_wp_error($media_uploads)) {
+            $uploads['subdir'] = $media_uploads['subdir'];
+            $uploads['path'] = $media_uploads['path'];
+            $uploads['url'] = $media_uploads['url'];
+            $uploads['basedir'] = $media_uploads['basedir'];
+            $uploads['baseurl'] = $media_uploads['baseurl'];
+        }
+    }
+
+    // Reset the static variable to false
+    $in_filter = false;
+
+    // Return the modified uploads array
+    return $uploads;
+}
+
+// Add the filter to modify the upload directory
+add_filter('upload_dir', __NAMESPACE__ . '\filter_upload_dir');
+
+/**
  * Prevents attempts to attach an attachment to a post ID during upload.
  */
 function prevent_attaching() {
