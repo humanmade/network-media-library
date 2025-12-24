@@ -225,7 +225,11 @@ add_action( 'parse_request', function() {
 		return;
 	}
 
-	if ( ! function_exists( 'get_current_screen' ) || 'upload' !== get_current_screen()->id ) {
+	if ( ! function_exists( 'get_current_screen' ) || ! get_current_screen() ) {
+		return;
+	}
+
+	if ( 'upload' !== get_current_screen()->id ){
 		return;
 	}
 
@@ -312,6 +316,47 @@ add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP
 	}
 
 	return $result;
+}, 0, 3 );
+
+/**
+ * Filter REST API responses for post saves which include featured_media
+ * field and force the post meta update even if the id doesn't exist on the
+ * current site.
+ *
+ * @param \WP_HTTP_Response|\WP_Error $response
+ * @param array                       $handler
+ * @param \WP_REST_Request            $request
+ *
+ * @return \WP_HTTP_Response|\WP_Error
+ *
+ * @wp-hook rest_request_after_callbacks
+ */
+add_filter( 'rest_request_after_callbacks', function ( $response, array $handler, \WP_REST_Request $request ) {
+	if ( is_media_site() ) {
+		return $response;
+	}
+
+	$featuredImage = (int) $request['featured_media'] ?? null;
+
+	if ( $featuredImage ) {
+		switch_to_media_site();
+		$attachment = get_post( $featuredImage );
+		restore_current_blog();
+
+		$post_id = (int) $request['id'] ?? null;
+
+		if ( $attachment ) {
+			update_post_meta( $post_id, '_thumbnail_id', $featuredImage );
+		} else {
+			delete_post_meta( $post_id, '_thumbnail_id' );
+		}
+
+		$data                   = $response->get_data();
+		$data['featured_media'] = $featuredImage;
+		$response->set_data( $data );
+	}
+
+	return $response;
 }, 0, 3 );
 
 /**
@@ -414,7 +459,7 @@ class ACF_Value_Filter {
 	 *
 	 * @var mixed Field value.
 	 */
-	protected $value = null;
+	protected $value = [];
 
 	/**
 	 * Sets up the necessary action and filter callbacks.
@@ -457,7 +502,7 @@ class ACF_Value_Filter {
 			restore_current_blog();
 		}
 
-		$this->value = $image;
+		$this->value[ $field['name'] ] = $image;
 
 		return $image;
 	}
@@ -471,7 +516,7 @@ class ACF_Value_Filter {
 	 * @return mixed The updated value.
 	 */
 	public function filter_acf_attachment_format_value( $value, $post_id, array $field ) {
-		return $this->value;
+		return $this->value[ $field['name'] ];
 	}
 }
 
