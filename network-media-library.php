@@ -544,6 +544,10 @@ class ACF_Field_Rendering {
 	public function __construct() {
 		add_action( 'acf/render_field', [ $this, 'maybe_restore_current_blog' ], -999 );
 		add_action( 'acf/render_field/type=file', [ $this, 'maybe_switch_to_media_site' ], 0 );
+
+		// ACF renders its file field at priority 9, so restore the originating site immediately afterwards.
+		// Waiting for the next field's render hook is too late because ACF loads that field's value first.
+		add_action( 'acf/render_field/type=file', [ $this, 'maybe_restore_current_blog' ], 10 );
 	}
 
 	/**
