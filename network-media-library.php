@@ -319,6 +319,81 @@ add_filter( 'rest_pre_dispatch', function( $result, \WP_REST_Server $server, \WP
 }, 0, 3 );
 
 /**
+ * Restores WordPress's standard embeddable featured-media link for a shared network attachment.
+ *
+ * Core omits this link on secondary sites because it checks the attachment before Network Media
+ * Library switches to the central media site. Restoring the standard relation allows WordPress's
+ * existing REST embedding pipeline to retrieve the attachment through the media route.
+ *
+ * @param \WP_REST_Response $response Prepared REST response for the post.
+ * @param \WP_Post          $post     Post represented by the REST response.
+ * @param \WP_REST_Request  $request  Current REST request.
+ * @return \WP_REST_Response Prepared REST response with the shared featured-media relation.
+ */
+function restore_featured_media_rest_link( \WP_REST_Response $response, \WP_Post $post, \WP_REST_Request $request ) : \WP_REST_Response {
+	unset( $request );
+
+	$relation = 'https://api.w.org/featuredmedia';
+	$links    = $response->get_links();
+
+	if ( ! empty( $links[ $relation ] ) ) {
+		return $response;
+	}
+
+	$attachment_id = (int) get_post_meta( $post->ID, '_thumbnail_id', true );
+
+	if ( $attachment_id <= 0 ) {
+		return $response;
+	}
+
+	$switched = ! is_media_site();
+
+	if ( $switched ) {
+		switch_to_media_site();
+	}
+
+	$attachment = get_post( $attachment_id );
+	$is_image   = $attachment instanceof \WP_Post
+		&& 'attachment' === $attachment->post_type
+		&& wp_attachment_is_image( $attachment );
+
+	if ( $switched ) {
+		restore_current_blog();
+	}
+
+	if ( ! $is_image ) {
+		return $response;
+	}
+
+	$response->add_link(
+		$relation,
+		rest_url( sprintf( '/wp/v2/media/%d', $attachment_id ) ),
+		[ 'embeddable' => true ]
+	);
+
+	return $response;
+}
+
+/**
+ * Registers shared featured-media compatibility for REST-visible post types that support thumbnails.
+ *
+ * @return void
+ */
+function register_featured_media_rest_filters() {
+	$post_types = get_post_types( [ 'show_in_rest' => true ], 'objects' );
+
+	foreach ( $post_types as $post_type ) {
+		if ( ! post_type_supports( $post_type->name, 'thumbnail' ) ) {
+			continue;
+		}
+
+		add_filter( "rest_prepare_{$post_type->name}", __NAMESPACE__ . '\\restore_featured_media_rest_link', 10, 3 );
+	}
+}
+
+add_action( 'rest_api_init', __NAMESPACE__ . '\\register_featured_media_rest_filters' );
+
+/**
  * Filter REST API responses for post saves which include featured_media
  * field and force the post meta update even if the id doesn't exist on the
  * current site.
