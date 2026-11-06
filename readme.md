@@ -58,6 +58,17 @@ The following plugins and libraries have been tested and confirmed as compatible
 * [Stream](https://wordpress.org/plugins/stream/)
 * [User Profile Picture](https://wordpress.org/plugins/metronet-profile-picture/)
 
+### Advanced Custom Fields
+
+Image, file, and gallery fields are supported wherever they're used (blocks, repeaters, groups, flexible content, options pages). To add or remove field types whose attachments live on the media library site, use the `network-media-library/acf_field_types` filter (default: `image`, `file`, `gallery`):
+
+```php
+add_filter( 'network-media-library/acf_field_types', function( array $types ) {
+    $types[] = 'my_custom_attachment_field';
+    return $types;
+} );
+```
+
 I plan to fully test (and add support if necessary) many other plugins and libraries, including CMB2, Fieldmanager, and many gallery and media management plugins. Stay tuned for updates!
 
 ## Screenshots
