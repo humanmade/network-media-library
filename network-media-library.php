@@ -454,120 +454,114 @@ remove_filter( 'the_content', 'wp_make_content_images_responsive' );
 add_filter( 'the_content', __NAMESPACE__ . '\make_content_images_responsive' );
 
 /**
- * A class which encapsulates the filtering of ACF field values.
+ * Makes ACF's attachment field types resolve their attachments on the network media library site.
+ *
+ * ACF looks up image, file and gallery attachments on the current site, where they don't exist. Wrapping the
+ * field type's own render, format and validate callbacks (priorities 9 and 10) in a site switch covers every
+ * field of that type, wherever it is used (blocks, repeaters, options pages, post meta).
  */
-class ACF_Value_Filter {
+class ACF_Attachment_Fields {
 
 	/**
-	 * Stores the value of the field.
+	 * Records for each active switch whether it actually switched sites.
 	 *
-	 * @var mixed Field value.
+	 * @var bool[]
 	 */
-	protected $value = [];
+	protected $stack = [];
+
+	/**
+	 * Field types whose attachments live on the network media library site.
+	 *
+	 * @var string[]
+	 */
+	protected $types = [];
 
 	/**
 	 * Sets up the necessary action and filter callbacks.
 	 */
 	public function __construct() {
-		$field_types = [
-			'image',
-			'file',
-		];
-
-		foreach ( $field_types as $type ) {
-			add_filter( "acf/load_value/type={$type}", [ $this, 'filter_acf_attachment_load_value' ], 0, 3 );
-			add_filter( "acf/format_value/type={$type}", [ $this, 'filter_acf_attachment_format_value' ], 9999, 3 );
-		}
+		// Late enough for themes to filter the field types.
+		add_action( 'init', [ $this, 'setup' ], 1 );
 	}
 
 	/**
-	 * Fiters the return value when using field retrieval functions in Advanced Custom Fields.
-	 *
-	 * @param mixed      $value   The field value.
-	 * @param int|string $post_id The post ID for this value.
-	 * @param array      $field   The field array.
-	 * @return mixed The updated value.
+	 * Hooks into the ACF field type callbacks.
 	 */
-	public function filter_acf_attachment_load_value( $value, $post_id, array $field ) {
-		$image = $value;
+	public function setup() {
+		/**
+		 * Filters the ACF field types whose attachments live on the network media library site.
+		 *
+		 * @param string[] $types ACF field type names.
+		 */
+		$this->types = array_filter( (array) apply_filters( 'network-media-library/acf_field_types', [ 'image', 'file', 'gallery' ] ), 'is_string' );
 
-		if ( ! is_media_site() && ! is_admin() ) {
-			switch_to_media_site();
+		foreach ( $this->types as $type ) {
+			// ACF registers its own callbacks on these hooks at priority 9 (render) and 10 (format, validate).
+			add_action( "acf/render_field/type={$type}", [ $this, 'switch' ], 5 );
+			add_action( "acf/render_field/type={$type}", [ $this, 'restore' ], 15 );
 
-			switch ( $field['return_format'] ) {
-				case 'url':
-					$image = wp_get_attachment_url( $value );
-					break;
-				case 'array':
-					$image = acf_get_attachment( $value );
-					break;
+			foreach ( [ 'format_value', 'validate_value' ] as $hook ) {
+				add_filter( "acf/{$hook}/type={$type}", [ $this, 'switch' ], 5 );
+				add_filter( "acf/{$hook}/type={$type}", [ $this, 'restore' ], 15 );
 			}
+		}
 
+		add_action( 'admin_init', [ $this, 'maybe_switch_for_ajax' ], 0 );
+	}
+
+	/**
+	 * Switches to the media site, unless already on it.
+	 *
+	 * @param mixed $value An optional value used when this function is used as a hook filter.
+	 * @return mixed The value of the `$value` parameter.
+	 */
+	public function switch( $value = null ) {
+		$needs_switch  = get_current_blog_id() !== get_site_id();
+		$this->stack[] = $needs_switch;
+
+		if ( $needs_switch ) {
+			switch_to_media_site();
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Restores the site switched away from by the matching `switch()` call.
+	 *
+	 * @param mixed $value An optional value used when this function is used as a hook filter.
+	 * @return mixed The value of the `$value` parameter.
+	 */
+	public function restore( $value = null ) {
+		if ( array_pop( $this->stack ) ) {
 			restore_current_blog();
 		}
 
-		$this->value[ $field['name'] ] = $image;
-
-		return $image;
+		return $value;
 	}
 
 	/**
-	 * Fiters the optionally formatted value when using field retrieval functions in Advanced Custom Fields.
+	 * Switches to the media site for the AJAX endpoints of ACF attachment fields, e.g. `acf/fields/gallery/get_attachment`.
 	 *
-	 * @param mixed      $value   The field value.
-	 * @param int|string $post_id The post ID for this value.
-	 * @param array      $field   The field array.
-	 * @return mixed The updated value.
+	 * The requests end right after the handler, so the site is not restored.
 	 */
-	public function filter_acf_attachment_format_value( $value, $post_id, array $field ) {
-		return $this->value[ $field['name'] ];
-	}
-}
-
-new ACF_Value_Filter();
-
-/**
- * A class which encapsulates the rendering of ACF field controls.
- */
-class ACF_Field_Rendering {
-
-	/**
-	 * Stored the site switching state between instances of fields.
-	 *
-	 * @var bool Whether the previous field triggered a switch to the central media site.
-	 */
-	protected $switched = false;
-
-	/**
-	 * Sets up the necessary action and filter callbacks.
-	 */
-	public function __construct() {
-		add_action( 'acf/render_field', [ $this, 'maybe_restore_current_blog' ], -999 );
-		add_action( 'acf/render_field/type=file', [ $this, 'maybe_switch_to_media_site' ], 0 );
-	}
-
-	/**
-	 * Switches to the central media site.
-	 */
-	public function maybe_switch_to_media_site() {
-		$this->switched = true;
-
-		switch_to_media_site();
-	}
-
-	/**
-	 * Switches back to the current site if the previous field triggered a switch to the central media site.
-	 */
-	public function maybe_restore_current_blog() {
-		if ( ! empty( $this->switched ) ) {
-			restore_current_blog();
+	public function maybe_switch_for_ajax() {
+		if ( ! wp_doing_ajax() || empty( $_REQUEST['action'] ) || ! is_string( $_REQUEST['action'] ) ) {
+			return;
 		}
 
-		$this->switched = false;
+		$action = sanitize_text_field( wp_unslash( $_REQUEST['action'] ) );
+
+		foreach ( $this->types as $type ) {
+			if ( 0 === strpos( $action, "acf/fields/{$type}/" ) ) {
+				$this->switch();
+				return;
+			}
+		}
 	}
 }
 
-new ACF_Field_Rendering();
+new ACF_Attachment_Fields();
 
 /**
  * A class which handles saving the post's featured image ID.
